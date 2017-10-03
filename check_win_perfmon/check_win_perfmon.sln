@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "check_win_perfmon", "check_win_perfmon\check_win_perfmon.csproj", "{DA215B4A-6DB1-431F-B0D9-45DB57DE60ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA215B4A-6DB1-431F-B0D9-45DB57DE60ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA215B4A-6DB1-431F-B0D9-45DB57DE60ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA215B4A-6DB1-431F-B0D9-45DB57DE60ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA215B4A-6DB1-431F-B0D9-45DB57DE60ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C621BD7B-1D09-4F84-8E81-759E75CB9DF4}
+	EndGlobalSection
+EndGlobal
