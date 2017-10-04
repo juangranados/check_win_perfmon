@@ -20,6 +20,9 @@ namespace check_win_perfmon
         [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
         public int TimeSamples { get; set; }
 
+        [Option('v', "verbose", DefaultValue = false, HelpText = "Verbose output to debug.")]
+        public bool Verbose { get; set; }
+
         [HelpOption]
         public string GetUsage()
         {
@@ -86,7 +89,7 @@ namespace check_win_perfmon
                             node.SelectSingleNode("critical").InnerText,
                             node.SelectSingleNode("min").InnerText,
                             node.SelectSingleNode("max").InnerText,
-                            status, options.MaxSamples
+                            status, options.MaxSamples, options.Verbose
                         )
                     );
                 }
@@ -128,12 +131,12 @@ namespace check_win_perfmon
                     perfCounter.Dispose();
                 }
             }
-            //No errors in PerfCounter, all are between ranges
+            //No errors in PerfCounter, all counters are between ranges
             if (output == null)
             {
                 output = $"OK - All performance counters between range{perfOutput.TrimEnd()}";
             }
-            //Some PerfCounters has errors 
+            //Some counters has values out of tresholds
             else
             {
                 //Generate output with errors and performance data

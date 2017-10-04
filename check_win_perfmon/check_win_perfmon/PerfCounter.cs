@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 /// <summary>
-/// Class to manage performance counter, generate and calculate output in Icinga/Nagios format
+/// Class to manage performance counter, generate and calculate output in Icinga/Nagios format.
 /// </summary>
 public class PerfCounter
 {
@@ -16,14 +16,15 @@ public class PerfCounter
     private float max;
     private Status status;
     private int samples;
-    private int samplesCount;
-    private float result;
-    private string resultString;
-    private string perfString;
     private bool check;
-    private bool initialized;
+    private int samplesCount = 0;
+    private float result = 0;
+    private string resultString = null;
+    private string perfString = null;
+    private bool initialized = false;
     private bool _disposed = false;
     static string format = "0." + new string('#', 324);
+    bool verbose = false;
     /// <summary>
     /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
     /// </summary>
@@ -46,16 +47,12 @@ public class PerfCounter
     /// <param name="max">Max value of performance counter.</param>
     /// <param name="status">Status class to store overall status of checks</param>
     /// <param name="samples">Number of performance samples to take</param>
-    public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, Status status, int samples)
+    public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, Status status, int samples,bool verbose = false)
     {
         //Initializing variables
         this.status = status;
         this.samples = samples;
-        samplesCount = 0;
-        result = 0;
-        resultString = null;
-        perfString = null;
-        initialized = false;
+        this.verbose = verbose;
 
         //All paramenters must have value
         if (categoryName == null || counterName == null || instanceName == null || friendlyName == null || units == null || warning == null || critical == null || min == null || max == null)
@@ -99,6 +96,7 @@ public class PerfCounter
             {
                 performanceCounter = new PerformanceCounter(categoryName, counterName);
             }
+            WriteVerbose($"Created performance counter \\{categoryName}\\{counterName}\\{instanceName}");
         }
         catch (Exception e)
         {
@@ -188,7 +186,7 @@ public class PerfCounter
                 }
                 else
                 {
-                    throw new Exception(message: "Parameter auto not supported for this counter max.");
+                    throw new Exception(message: "Parameter 'auto' not supported for this counter max value.");
                 }
             }
         }
@@ -209,6 +207,7 @@ public class PerfCounter
             //Initialice counter
             performanceCounter.NextValue();
             initialized = true;
+            WriteVerbose($"Initialized performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
         }
         //Counter already initialized
         else
@@ -218,7 +217,9 @@ public class PerfCounter
             //Add value to total result
             try
             {
-                result = result + performanceCounter.NextValue();
+                float nextValue = performanceCounter.NextValue();
+                WriteVerbose($"Next value of performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}: {nextValue}");
+                result = result + nextValue;
             }
             catch (Exception e)
             {
@@ -228,8 +229,10 @@ public class PerfCounter
             //Last sample taken
             if (samples == samplesCount)
             {
+                WriteVerbose($"Last sample of {samples} taken for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
                 //Calculate average of samples
                 result = result / samples;
+                WriteVerbose($"Average result for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}: {result}");
                 CalculatePerformance();
                 //Check status of a counter
                 if (check)
@@ -281,7 +284,7 @@ public class PerfCounter
             {
                 //Calculate percent of result and round to zero floats
                 //Calculate percent of warning and critical and round to zero floats
-                //Add new pocercent to performance output
+                //Add new percent to performance output
                 perfString = perfString + $"'{friendlyName}Percent'={Math.Round(((result * 100) / max), 0, MidpointRounding.AwayFromZero)}%;{Math.Round(((warning * 100) / max), 0, MidpointRounding.AwayFromZero)};{Math.Round(((critical * 100) / max), 0, MidpointRounding.AwayFromZero)};0;100 ";
             }
         }
@@ -324,6 +327,13 @@ public class PerfCounter
                 status.Warning = true;
                 resultString = $"{friendlyName} = {(Math.Round(result, 4, MidpointRounding.AwayFromZero)).ToString(format)} warning.";
             }
+        }
+    }
+    private void WriteVerbose(string output)
+    {
+        if (verbose)
+        {
+            Console.WriteLine(output);
         }
     }
     /// <summary>
