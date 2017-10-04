@@ -18,7 +18,6 @@
 !PerfMomMem.xml
 !PerfMonPhysicalDisk.xml
 !PerfMonNetwork.xml
-![Dd]ebug/*.xml
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
