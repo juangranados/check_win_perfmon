@@ -13,11 +13,8 @@
 *.userprefs
 
 # Build results
-!check_win_perfmon.exe
-!PerMonCPU.xml
-!PerfMomMem.xml
-!PerfMonPhysicalDisk.xml
-!PerfMonNetwork.xml
+!**.exe
+!**.xml
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
