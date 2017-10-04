@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Buinaries and XML
+!**.exe
+!**.xml
+
 # User-specific files
 *.suo
 *.user
@@ -13,8 +17,6 @@
 *.userprefs
 
 # Build results
-!**.exe
-!**.xml
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
