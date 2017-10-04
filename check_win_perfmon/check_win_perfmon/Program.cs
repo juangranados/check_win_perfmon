@@ -30,7 +30,7 @@ namespace check_win_perfmon
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };
-            help.AddPreOptionsLine("GNU General Public License\n");
+            help.AddPreOptionsLine("GNU General Public License 3.0\n");
             help.AddPreOptionsLine("Usage: check_win_perfmon.exe params:\n");
             help.AddOptions(this);
             return help;
