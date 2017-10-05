@@ -25,6 +25,7 @@ public class PerfCounter
     private bool _disposed = false;
     static string format = "0." + new string('#', 324);
     bool verbose = false;
+    float nextValue;
     /// <summary>
     /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
     /// </summary>
@@ -96,7 +97,7 @@ public class PerfCounter
             {
                 performanceCounter = new PerformanceCounter(categoryName, counterName);
             }
-            WriteVerbose($"Created performance counter \\{categoryName}\\{counterName}\\{instanceName}");
+            WriteVerbose($"Created performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
         }
         catch (Exception e)
         {
@@ -217,7 +218,7 @@ public class PerfCounter
             //Add value to total result
             try
             {
-                float nextValue = performanceCounter.NextValue();
+                nextValue = performanceCounter.NextValue();
                 WriteVerbose($"Next value of performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}: {nextValue}");
                 result = result + nextValue;
             }
@@ -232,7 +233,6 @@ public class PerfCounter
                 WriteVerbose($"Last sample of {samples} taken for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
                 //Calculate average of samples
                 result = result / samples;
-                WriteVerbose($"Average result for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}: {result}");
                 CalculatePerformance();
                 //Check status of a counter
                 if (check)
@@ -297,6 +297,7 @@ public class PerfCounter
         //Warning greater than critical->Counter has to be less than warning and critical to be ok.
         if (warning < critical)
         {
+            WriteVerbose($"Average result for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} -> Must be less than {critical} and {warning} to be ok");
             //Status critical
             if (result >= critical)
             {
@@ -304,28 +305,41 @@ public class PerfCounter
                 status.Critical = true;
                 //Generate error message
                 resultString = $"{friendlyName} = {(Math.Round(result, 4)).ToString(format)} critical.";
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} >= {critical} -> status critical");
             }
             //Status warning
             else if (result >= warning)
             {
                 status.Warning = true;
                 resultString = $"{friendlyName} = {(Math.Round(result, 4)).ToString(format)} warning.";
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} >= {warning} -> status warning");
+            }
+            else
+            {
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} -> status ok");
             }
         }
         //Warning less than critical->Counter has to be greater than warning and critical to be ok.
         else
         {
+            WriteVerbose($"Average result for performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} -> Must be greater than {critical} and {warning} to be ok");
             //Status critical
             if (result <= critical)
             {
                 status.Critical = true;
                 resultString = $"{friendlyName} = {(Math.Round(result, 4, MidpointRounding.AwayFromZero)).ToString(format)} critical.";
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} <= {critical} -> status critical");
             }
             //Status warning
             else if (result <= warning)
             {
                 status.Warning = true;
                 resultString = $"{friendlyName} = {(Math.Round(result, 4, MidpointRounding.AwayFromZero)).ToString(format)} warning.";
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} = {result} <= {warning} -> status warning");
+            }
+             else
+            {
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} -> status ok");
             }
         }
     }
@@ -333,7 +347,7 @@ public class PerfCounter
     {
         if (verbose)
         {
-            Console.WriteLine(output);
+            Console.WriteLine($"[{DateTime.Now.ToString("MM/dd/yyyy-HH:mm:ss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)}] {output}");
         }
     }
     /// <summary>
@@ -348,6 +362,7 @@ public class PerfCounter
             {
                 performanceCounter.Close();
                 performanceCounter.Dispose();
+                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} Disposed");
             }
             // Disposed of any unmanaged objects. Not any
             _disposed = true;
