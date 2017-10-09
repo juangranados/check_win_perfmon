@@ -2,6 +2,8 @@
 Plugin for Icinga/Nagios that allow to check a group of Windows performance counters.
 It checks value of performance counter based on threshold specified and returns exit and performance data in Icinga/Nagios format.
 
+[Download](https://github.com/juangranados/check_win_perfmon/files/1367996/check_win_perfmon.zip)
+
 ***Example:*** check_win_perfmon.exe -f PerfMonCPU.xml
 
 >OK - All performance counters between range | 'ProcessorTime'=3%;95;100;0;100 'UserTime'=2%;85;95;0;100 'DPCTime'=0%;15;20;0;100 'InterruptTime'=0%;10;15;0;100 'ProcessorQueueLength'=0;4;8;;
@@ -27,6 +29,8 @@ In downloaded zip package, there are several .xml files preconfigured:
 * ***PerfMonCPU.xml***: Performance Counters to check CPU load.
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
+
+***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
 
 You can set up your own performance counters adding them to xml files or creating new ones.
 
