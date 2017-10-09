@@ -39,6 +39,7 @@ To list available performance counters on a system in a PowerShell console type:
 ```PowerShell
 Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
 ```
+You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
 
 Usage
 -----
@@ -55,6 +56,52 @@ check_win_perfmon.exe [parameters]:
 **Example:** check_win_perfmon.exe -f PerfMonMem.xml -s 10 -t 2000
 
 Check performance counters of PerfMonMem.xml taking 10 samples with 2 sec interval.
+
+XML Format
+----------
+XML file used has the following format, for example:
+
+´´´xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% Processor Time</name>
+		<instance>_Total</instance>
+		<friendlyname>ProcessorTime</friendlyname>
+		<units>%</units>
+		<warning>95</warning>
+		<critical>100</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Memory</category>
+		<name>Available MBytes</name>
+		<instance>none</instance>
+		<friendlyname>AvailableMBytes</friendlyname>
+		<units>MB</units>
+		<warning>1024</warning>
+		<critical>512</critical>
+		<min>0</min>
+		<max>auto</max>
+	</perfcounter>
+</perfcounters> 
+´´´
+
+The program will check two counters. For each counter, we need to set:
+
+* category: Category of performance counter
+* name: Name of the performance counter.
+* instance: Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
+* friendlyname: name of performance counter which program returns in his output.
+* units: units program return in output.
+* warning: Warning threshold for performance counter.
+* critical:Critical threshold for performance counter.
+* min: minimun value of performance counter. If you do not know the minimun value, it has to be: none.
+* max: maximum value of performance counter.  If you do not know the minimun value, it has to be: none. This value can be auto for Memory category, program will detect the amount of memory installed on system.
+
+If max and min are specified, program returns one more result for percent value.
 
 Icinga Agent Configuration
 --------------------------
