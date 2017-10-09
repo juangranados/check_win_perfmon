@@ -61,7 +61,7 @@ XML Format
 ----------
 XML file used has the following format, for example:
 
-´´´xml
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <perfcounters>
 	<perfcounter>
@@ -87,9 +87,9 @@ XML file used has the following format, for example:
 		<max>auto</max>
 	</perfcounter>
 </perfcounters> 
-´´´
+```
 
-The program will check two counters. For each counter, we need to set:
+In the example above, program will check two counters. For each counter, we need to set:
 
 * category: Category of performance counter
 * name: Name of the performance counter.
