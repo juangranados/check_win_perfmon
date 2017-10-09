@@ -59,7 +59,7 @@ Check performance counters of PerfMonMem.xml taking 10 samples with 2 sec interv
 
 XML Format
 ----------
-XML file used has the following format, for example:
+XML file used must have the following format, for example:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
