@@ -1,7 +1,7 @@
 # Check Win Perfmon
 Plugin for Icinga/Nagios that allow to check a group of Windows performance counters.
 
-It checks value of performance counter based on threshold specified.
+Checks value of performance counter based on threshold specified.
 
 Returns exit and performance data in Icinga/Nagios format.
 
