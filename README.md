@@ -91,17 +91,18 @@ XML file used must have the following format, for example:
 
 In the example above, program will check two counters. For each counter, we need to set:
 
-* category: Category of performance counter
-* name: Name of the performance counter.
-* instance: Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
-* friendlyname: name of performance counter which program returns in his output.
-* units: units program return in output.
-* warning: Warning threshold for performance counter.
-* critical:Critical threshold for performance counter.
-* min: minimun value of performance counter. If you do not know the minimun value, it has to be: none.
-* max: maximum value of performance counter.  If you do not know the minimun value, it has to be: none. This value can be auto for Memory category, program will detect the amount of memory installed on system.
+* **category:** Category of performance counter
+* **name:** Name of the performance counter.
+* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
+* **friendlyname:** name of performance counter which program returns in his output.
+* **units:** units program return in output.
+* **warning:** Warning threshold for performance counter.
+* **critical:** Critical threshold for performance counter.
+* **min:** minimun value of performance counter. If you do not know the minimun value, it has to be: none.
+* **max:** maximum value of performance counter.  If you do not know the minimun value, it has to be: none. This value can be auto for Memory category, program will detect the amount of memory installed on system.
 
 If max and min are specified, program returns one more result for percent value.
+Max and min must have different value.
 
 Icinga Agent Configuration
 --------------------------
