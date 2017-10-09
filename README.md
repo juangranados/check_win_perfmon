@@ -1,3 +1,4 @@
+
 # check_win_perfmon
 Plugin for Icinga/Nagios that allow to check a group of Windows performance counters.
 It checks value of performance counter based on threshold specified and returns exit and performance data in Icinga/Nagios format.
@@ -53,3 +54,67 @@ check_win_perfmon.exe [parameters]:
 **Example:** check_win_perfmon.exe -f PerfMonMem.xml -s 10 -t 2000
 
 Check performance counters of PerfMonMem.xml taking 10 samples with 2 sec interval.
+
+Icinga Agent Configuration
+--------------------------
+**Command**
+
+```
+object CheckCommand "check_win_perfmon" {
+	import "plugin-check-command"
+	command = [ "C:\\Program Files\\ICINGA2\\sbin\\check_win_perfmon.exe" ]
+	arguments = {
+		"-f" = {
+			value = "$xml$"
+			order = 1
+			description = "XML file"
+		}
+		"-t" = {
+			value = "$interval$"
+			order = 2
+			description = "Time between samples"
+		}
+		"-s" = {
+			value = "$samples$"
+			order = 3
+			description = "Samples to take"
+		}
+	}
+}
+```
+
+**Service**
+
+```
+apply Service "CPU Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonCPU.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Network Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonNetwork.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Disk_0 Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonPhysicalDisk.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Memory Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonMem.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+```
