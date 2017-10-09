@@ -30,6 +30,8 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
 
+***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
+
 You can set up your own performance counters adding them to xml files or creating new ones.
 
 To list available performance counters on a system in a PowerShell console type:
