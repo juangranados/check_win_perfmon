@@ -56,7 +56,7 @@ check_win_perfmon.exe [parameters]:
 
 * -t, --timeSamples    (Default: 1000) Time between samples in ms.
 
-* -v, --verbose        (Default: False) Verbose output for debuging.
+* -v, --verbose        Verbose output for debuging.
 
 **Example:** check_win_perfmon.exe -f PerfMonMem.xml -s 10 -t 2000
 
