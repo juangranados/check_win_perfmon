@@ -42,8 +42,8 @@ public class PerfCounter
     /// <param name="instanceName">Instance of performance counter. "none" if performance counter does not have an instance</param>
     /// <param name="friendlyName">Friendly name to return check result in Icinga/Nagios format</param>
     /// <param name="units">Units of performance counter in Icinga/Nagios format</param>
-    /// <param name="warning">Warning treshold of performance counter</param>
-    /// <param name="critical">Critical treshold of performance counter</param>
+    /// <param name="warning">Warning threshold of performance counter</param>
+    /// <param name="critical">Critical threshold of performance counter</param>
     /// <param name="min">Minumal value of performance counter</param>
     /// <param name="max">Max value of performance counter.</param>
     /// <param name="status">Status class to store overall status of checks</param>

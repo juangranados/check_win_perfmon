@@ -20,7 +20,7 @@ namespace check_win_perfmon
         [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
         public int TimeSamples { get; set; }
 
-        [Option('v', "verbose", DefaultValue = false, HelpText = "Verbose output to debug.")]
+        [Option('v', "verbose", HelpText = "Verbose output to debug.")]
         public bool Verbose { get; set; }
 
         [HelpOption]
@@ -40,7 +40,7 @@ namespace check_win_perfmon
         }
     }
     /// <summary>
-    /// Load xml file with performance counters and their treshholds.
+    /// Load xml file with performance counters and their threshholds.
     /// Check performance counters aganist tresholds.
     /// Print performance info in Icinga/Nagios format
     /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
