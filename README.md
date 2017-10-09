@@ -67,7 +67,7 @@ XML Format
 ----------
 XML file used must have the following format, for example:
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <perfcounters>
 	<perfcounter>
