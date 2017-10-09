@@ -1,5 +1,5 @@
-﻿//Using nuget: (Install-Package) Costura.Fody, CommandLineParser
-//http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
+﻿// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
+// Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
 using System;
 using CommandLine;
 using System.Xml;
@@ -11,7 +11,7 @@ namespace check_win_perfmon
     /// </summary>
     class Options
     {
-        [Option('f', "xmlFile", DefaultValue = "perfcounts.xml", HelpText = "XML file with performance counters to check.")]
+        [Option('f', "xmlFile", DefaultValue = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
         public string XmlFile { get; set; }
 
         [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from perfmon.")]
