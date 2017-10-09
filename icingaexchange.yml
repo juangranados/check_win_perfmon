@@ -1,4 +1,4 @@
-name: Check Windows Performance Monitor
+name: Check Windows Performance Monitor Counters
 description: "file:///README.md"
 url: "https://github.com/juangranados/check_win_perfmon"
 tags: Microsoft Windows
