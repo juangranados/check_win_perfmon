@@ -1,11 +1,16 @@
-# check_win_perfmon
+# Check Win Perfmon
 Plugin for Icinga/Nagios that allow to check a group of Windows performance counters.
 It checks value of performance counter based on threshold specified and returns exit and performance data in Icinga/Nagios format.
 
-[Download](https://github.com/juangranados/check_win_perfmon/files/1367996/check_win_perfmon.zip)
+![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
+[Download](https://github.com/juangranados/check_win_perfmon/files/1368625/check_win_perfmon.zip) Check Win Perfmon. 
+
+Please read below prior use it! 
+
+Examples
+--------
 ***Example:*** check_win_perfmon.exe -f PerfMonCPU.xml
-
 >OK - All performance counters between range | 'ProcessorTime'=3%;95;100;0;100 'UserTime'=2%;85;95;0;100 'DPCTime'=0%;15;20;0;100 'InterruptTime'=0%;10;15;0;100 'ProcessorQueueLength'=0;4;8;;
 
 ***Example:*** check_win_perfmon.exe -f PerfMonMem.xml
@@ -36,7 +41,10 @@ You can set up your own performance counters adding them to xml files or creatin
 
 To list available performance counters on a system in a PowerShell console type:
 
-> Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
+```PowerShell
+Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
+```
+You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
 
 Usage
 -----
@@ -48,8 +56,119 @@ check_win_perfmon.exe [parameters]:
 
 * -t, --timeSamples    (Default: 1000) Time between samples in ms.
 
-* -v, --verbose        (Default: False) Verbose output for debuging.
+* -v, --verbose        Verbose output for debuging.
 
 **Example:** check_win_perfmon.exe -f PerfMonMem.xml -s 10 -t 2000
 
 Check performance counters of PerfMonMem.xml taking 10 samples with 2 sec interval.
+
+XML Format
+----------
+XML file used must have the following format, for example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% Processor Time</name>
+		<instance>_Total</instance>
+		<friendlyname>ProcessorTime</friendlyname>
+		<units>%</units>
+		<warning>95</warning>
+		<critical>100</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Memory</category>
+		<name>Available MBytes</name>
+		<instance>none</instance>
+		<friendlyname>AvailableMBytes</friendlyname>
+		<units>MB</units>
+		<warning>1024</warning>
+		<critical>512</critical>
+		<min>0</min>
+		<max>auto</max>
+	</perfcounter>
+</perfcounters> 
+```
+
+In the example above, program will check two counters. For each counter, we need to set:
+
+* **category:** Category of performance counter
+* **name:** Name of the performance counter.
+* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
+* **friendlyname:** name of performance counter which program returns in his output.
+* **units:** units program return in output.
+* **warning:** Warning threshold for performance counter.
+* **critical:** Critical threshold for performance counter.
+* **min:** minimun value of performance counter. If you do not know the minimun value, it has to be: none.
+* **max:** maximum value of performance counter.  If you do not know the minimun value, it has to be: none. This value can be auto for Memory category, program will detect the amount of memory installed on system.
+
+If max and min are specified, program returns one more result for percent value.
+Max and min must have different value.
+
+Icinga Agent Configuration
+--------------------------
+**Command**
+
+```
+object CheckCommand "check_win_perfmon" {
+	import "plugin-check-command"
+	command = [ "C:\\Program Files\\ICINGA2\\sbin\\check_win_perfmon.exe" ]
+	arguments = {
+		"-f" = {
+			value = "$xml$"
+			order = 1
+			description = "XML file"
+		}
+		"-t" = {
+			value = "$interval$"
+			order = 2
+			description = "Time between samples"
+		}
+		"-s" = {
+			value = "$samples$"
+			order = 3
+			description = "Samples to take"
+		}
+	}
+}
+```
+
+**Service**
+
+```
+apply Service "CPU Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonCPU.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Network Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonNetwork.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Disk_0 Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonPhysicalDisk.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+
+apply Service "Memory Load" {
+  import "generic-service"
+  check_command = "check_win_perfmon"
+  vars.xml = "C:\\Program Files\\ICINGA2\\sbin\\PerfMonMem.xml"
+  command_endpoint = host.name
+  assign where host.vars.os == "Windows"
+}
+```
