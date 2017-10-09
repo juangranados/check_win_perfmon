@@ -1,0 +1,18 @@
+name: Check Windows Performance Monitor
+description: "file:///README.md"
+url: "https://github.com/juangranados/check_win_perfmon"
+tags: Statistic
+vendor: Microsoft Windows
+target: Operating System
+type: Plugin
+license: gplv3
+releases: 
+  - 
+    name: 1.0
+    description: "1.0 Release"
+    files: 
+      - 
+        name: check_win_perfmon.zip
+        url: "https://github.com/juangranados/check_win_perfmon/files/1368625/check_win_perfmon.zip"
+        description: "First release"
+		checksum: 0ae689f08398013dc317fedece9d8a77
