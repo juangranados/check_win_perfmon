@@ -29,6 +29,8 @@ OK - All performance counters between range | 'AvgDiskSecTransfer'=0.0002s;0.04;
 ```
 OK - All performance counters between range | 'BytesTotalSec'=1885.7051B;15728640;17825790;0;20971520 'BytesTotalSecPercent'=0%;75;85;0;100 'OutputQueueLength'=0;2;3;;
 ```
+Preconfigured XML files
+-----------------------
 In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonNetwork.xml***: Performance Counters to check network load.
@@ -39,16 +41,12 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
 
+References
+----------
+
 ***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
 
-You can set up your own performance counters adding them to xml files or creating new ones.
 
-To list available performance counters on a system in a PowerShell console type:
-
-```PowerShell
-Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
-```
-You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
 
 Usage
 -----
@@ -66,8 +64,20 @@ check_win_perfmon.exe [parameters]:
 
 Check performance counters of PerfMonMem.xml taking 10 samples with 2 sec interval.
 
-XML Format
-----------
+Creating new XML files to check your own performance counters
+-------------------------------------------------------------
+
+You can set up your own performance counters adding them to xml files or creating new ones.
+
+To list available performance counters on a system in a PowerShell console type:
+
+```PowerShell
+Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
+```
+You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
+
+***XML Format***
+
 XML file used must have the following format, for example:
 
 ```xml
