@@ -41,12 +41,9 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
 
-References
-----------
+***References***
 
 ***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
-
-
 
 Usage
 -----
