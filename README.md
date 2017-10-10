@@ -41,7 +41,7 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
 
-***References***
+**References**
 
 ***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
 
@@ -54,7 +54,6 @@ check_win_perfmon.exe [parameters]:
 * -s, --maxSamples     (Default: 3) Amount of samples to take from perfmon.
 
 * -t, --timeSamples    (Default: 1000) Time between samples in ms.
-
 * -v, --verbose        Verbose output for debuging.
 
 **Example:** check_win_perfmon.exe -f PerfMonMem.xml -s 10 -t 2000
@@ -73,7 +72,7 @@ Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
 ```
 You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
 
-***XML Format***
+**XML Format**
 
 XML file used must have the following format, for example:
 
