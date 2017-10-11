@@ -11,6 +11,18 @@ Returns exit and performance data in Icinga/Nagios format.
 
 Please read below prior use it! 
 
+Preconfigured XML files
+-----------------------
+In downloaded zip package, there are several .xml files preconfigured:
+
+* ***PerfMonNetwork.xml***: Performance Counters to check network load.
+
+* ***PerfMonPhysicalDisk.xml***:Performance Counters to check physical Disk load.
+
+* ***PerfMonCPU.xml***: Performance Counters to check CPU load.
+
+* ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
+
 Examples
 --------
 ***Example CPU counters:*** check_win_perfmon.exe -f PerfMonCPU.xml
@@ -29,18 +41,6 @@ OK - All performance counters between range | 'AvgDiskSecTransfer'=0.0002s;0.04;
 ```
 OK - All performance counters between range | 'BytesTotalSec'=1885.7051B;15728640;17825790;0;20971520 'BytesTotalSecPercent'=0%;75;85;0;100 'OutputQueueLength'=0;2;3;;
 ```
-Preconfigured XML files
------------------------
-In downloaded zip package, there are several .xml files preconfigured:
-
-* ***PerfMonNetwork.xml***: Performance Counters to check network load.
-
-* ***PerfMonPhysicalDisk.xml***:Performance Counters to check physical Disk load.
-
-* ***PerfMonCPU.xml***: Performance Counters to check CPU load.
-
-* ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
-
 **References**
 
 ***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
