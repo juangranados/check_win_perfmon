@@ -4,6 +4,7 @@ using System;
 using CommandLine;
 using System.Xml;
 using System.Collections.Generic;
+using System.Diagnostics;
 namespace check_win_perfmon
 {
     /// <summary>
@@ -49,6 +50,10 @@ namespace check_win_perfmon
     {
         static void Main(string[] args)
         {
+            //Set lower priority for the process
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+            //Use only first procesor
+            Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)1;
             //Change culture to en-US in order to use . as decimal separator
             System.Threading.Thread.CurrentThread.CurrentCulture =
             System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
