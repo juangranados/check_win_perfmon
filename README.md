@@ -119,6 +119,10 @@ In the example above, program will check two counters. For each counter, we need
 If max and min are specified, program returns one more result for percent value.
 Max and min must have different value.
 
+System Load
+-----------
+I tried to minimize system load during program execution, but check performance counters allways has an impact on system performance. Program execution has a 5% of CPU usage on old systems and a minimun impact on modern servers. The more performance counters you check at a time, the more system impact.
+
 Icinga Agent Configuration
 --------------------------
 **Command**
