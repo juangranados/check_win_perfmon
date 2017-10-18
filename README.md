@@ -69,6 +69,8 @@ To list available performance counters on a system in a PowerShell console type:
 
 ```PowerShell
 Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
+# For specified counter 
+Get-Counter -ListSet *processor* | Select-Object -ExpandProperty Counter
 ```
 You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
 
