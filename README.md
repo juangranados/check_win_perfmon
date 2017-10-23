@@ -7,7 +7,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
-[Download](https://github.com/juangranados/check_win_perfmon/files/1368625/check_win_perfmon.zip) Check Win Perfmon. 
+[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.1/check_win_perfmon.zip) Check Win Perfmon v1.1. 
 
 Please read below prior use it! 
 
@@ -22,6 +22,8 @@ In downloaded zip package, there are several .xml files preconfigured:
 * ***PerfMonCPU.xml***: Performance Counters to check CPU load.
 
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
+
+* ***PerfMonMSQL.xml***: Performance Counters to check Microsoft SQL Server.
 
 Examples
 --------
@@ -41,9 +43,17 @@ OK - All performance counters between range | 'AvgDiskSecTransfer'=0.0002s;0.04;
 ```
 OK - All performance counters between range | 'BytesTotalSec'=1885.7051B;15728640;17825790;0;20971520 'BytesTotalSecPercent'=0%;75;85;0;100 'OutputQueueLength'=0;2;3;;
 ```
+***Example Microsoft SQL counters:*** check_win_perfmon.exe -f PerfMonMSQL.xml
+```
+OK - All performance counters between range | 'TotalServerMemory'=8381528KB;14680060;16252930;0;16777220 'TotalServerMemoryPercent'=50%;88;97;0;100 'TargetServerMemory'=8388608KB;14680060;16252930;0;16777220 'TargetServerMemoryPercent'=50%;88;97;0;100 'PageReadsSec'=0;90;100;; 'PageWritesSec'=0;90;100;; 'BufferCacheHitRatio'=100;95;90;0;100 'BufferCacheHitRatioPercent'=100%;95;90;0;100 'PageLifeExpectancy'=109982.6641;400;300;; 'LazyWritesSec'=0;15;20;; 'FreeListStallsSec'=0;1;2;; 'MemoryGrantsPending'=0;1;2;; 'BatchRequestsSec'=16.6571;1000;2000;; 'UserConnections'=115.3333;600;700;; 'LockWaitsSec'=0;1;2;; 'ProcessesBlocked'=0;1;2;;
+```
+
 **References**
 
-***These values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
+***Values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
+
+***Values and counters for Microsoft SQL are based on articles from [SLQ Shack](https://www.sqlshack.com/sql-server-memory-performance-metrics-part-1-memory-pagessec-memory-page-faultssec/) and [Database Journal](http://www.databasejournal.com/features/mssql/article.php/3932406/Top-10-SQL-Server-Counters-for-Monitoring-SQL-Server-Performance.htm).***
+
 
 Usage
 -----
@@ -68,8 +78,9 @@ You can set up your own performance counters adding them to xml files or creatin
 To list available performance counters on a system in a PowerShell console type:
 
 ```PowerShell
+# Get all counters
 Get-Counter -ListSet * | Select-Object -ExpandProperty Counter
-# For specified counter 
+# Get specified counter 
 Get-Counter -ListSet *processor* | Select-Object -ExpandProperty Counter
 ```
 You can check performance counters on a Windows system: Start Menu->Administrative Tools->Performance Monitor->Clic on plus symbol
