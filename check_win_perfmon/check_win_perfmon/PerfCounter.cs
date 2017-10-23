@@ -255,7 +255,7 @@ public class PerfCounter
             min = 0;
 
             //Store performance output
-            perfString = $"'{friendlyName}'={Math.Round(result, 0, MidpointRounding.AwayFromZero)}{units};{warning};{critical};0;100 ";
+            perfString = $"'{friendlyName}'={Math.Floor(result)}{units};{warning};{critical};0;100 ";
         }
         //Units are not a percent
         else
@@ -285,7 +285,7 @@ public class PerfCounter
                 //Calculate percent of result and round to zero floats
                 //Calculate percent of warning and critical and round to zero floats
                 //Add new percent to performance output
-                perfString = perfString + $"'{friendlyName}Percent'={Math.Round(((result * 100) / max), 0, MidpointRounding.AwayFromZero)}%;{Math.Round(((warning * 100) / max), 0, MidpointRounding.AwayFromZero)};{Math.Round(((critical * 100) / max), 0, MidpointRounding.AwayFromZero)};0;100 ";
+                perfString = perfString + $"'{friendlyName}Percent'={Math.Floor(((result * 100) / max))}%;{Math.Floor(((warning * 100) / max))};{Math.Floor(((critical * 100) / max))};0;100 ";
             }
         }
     }
