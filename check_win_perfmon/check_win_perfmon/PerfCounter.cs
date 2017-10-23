@@ -90,14 +90,14 @@ public class PerfCounter
                         throw new Exception(message: "Parameter auto not supported for this counter instance.");
                     }
                 }
-                performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName);
+                performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName, true);
             }
             //Performance counter without instance
             else
             {
-                performanceCounter = new PerformanceCounter(categoryName, counterName);
+                performanceCounter = new PerformanceCounter(categoryName, counterName, true);
             }
-            WriteVerbose($"Created performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
+            WriteVerbose($"Created read only performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
         }
         catch (Exception e)
         {
@@ -360,9 +360,10 @@ public class PerfCounter
         {
             if (disposing)
             {
+                WriteVerbose($"Disposing Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName}");
                 performanceCounter.Close();
                 performanceCounter.Dispose();
-                WriteVerbose($"Performance counter \\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}\\{performanceCounter.InstanceName} Disposed");
+                performanceCounter = null;
             }
             // Disposed of any unmanaged objects. Not any
             _disposed = true;

@@ -132,9 +132,9 @@ namespace check_win_perfmon
                 {
                     //Get the error
                     output = output + perfCounter.ResultString + " ";
-                    //Dispose object   
-                    perfCounter.Dispose();
                 }
+                //Dispose object   
+                perfCounter.Dispose();
             }
             //No errors in PerfCounter, all counters are between ranges
             if (output == null)
