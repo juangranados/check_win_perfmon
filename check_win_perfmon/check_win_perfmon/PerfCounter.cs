@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Linq;
 /// <summary>
 /// Class to manage performance counter, generate and calculate output in Icinga/Nagios format.
 /// </summary>
@@ -54,6 +55,9 @@ public class PerfCounter
         this.status = status;
         this.samples = samples;
         this.verbose = verbose;
+
+        //Show performance counter creation
+        WriteVerbose($"Creating performance counter \\{categoryName}\\{counterName}\\{instanceName}");
 
         //All paramenters must have value
         if (categoryName == null || counterName == null || instanceName == null || friendlyName == null || units == null || warning == null || critical == null || min == null || max == null)
@@ -114,37 +118,15 @@ public class PerfCounter
         {
             this.friendlyName = Regex.Replace(counterName, @"[^A-Za-z0-9]+", "");
         }
-        //Counter have measure units
+        //Counter does have measure units
         if (units != "none")
         {
             this.units = units;
         }
-        //Counter not have measure unit
+        //Counter does not have measure unit
         else
         {
             this.units = "";
-        }
-        //Parse warning and critical into float
-        if (warning != "none" && warning != "none")
-        {
-            try
-            {
-                this.warning = float.Parse(warning, CultureInfo.InvariantCulture.NumberFormat);
-                this.critical = float.Parse(critical, CultureInfo.InvariantCulture.NumberFormat);
-                check = true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error parsing warning and critical. Please, check both are numbers.");
-                throw (e);
-            }
-        }
-        //if warning and critical are "none" counter will not check 
-        else
-        {
-            this.warning = 0;
-            this.critical = 0;
-            check = false;
         }
         //Parse min into float
         if (min != "none")
@@ -167,7 +149,11 @@ public class PerfCounter
         //Parse max into float
         if (max != "none")
         {
-            if (max != "auto")
+            if (max == "automemory")
+            {
+                this.max = Utils.GetTotalMemory(units);
+            }
+           else
             {
                 try
                 {
@@ -179,22 +165,66 @@ public class PerfCounter
                     throw (e);
                 }
             }
-            else
-            {
-                if (categoryName == "Memory")
-                {
-                    this.max = Utils.GetTotalMemory(units);
-                }
-                else
-                {
-                    throw new Exception(message: "Parameter 'auto' not supported for this counter max value.");
-                }
-            }
         }
         //No max specified
         else
         {
             this.max = -1;
+        }
+        //Parse warning and critical into float
+        if (warning != "none" && critical != "none")
+        {
+            try
+            {
+                //warning
+                if (warning.Contains('%'))
+                {
+                    if  (this.max != -1)
+                    {
+                        float percent = float.Parse(warning.Substring(0, warning.IndexOf("%")), CultureInfo.InvariantCulture.NumberFormat);
+                        this.warning = this.max * (percent / 100);
+                    }
+                    else
+                    {
+                        throw new Exception(message: "Can not calculate % of max because is none.");
+                    }
+                }
+                else
+                {
+                    this.warning = float.Parse(warning, CultureInfo.InvariantCulture.NumberFormat);
+                }
+                //Critical
+                if (critical.Contains('%'))
+                {
+                    if (this.max != -1)
+                    {
+                        float percent = float.Parse(critical.Substring(0, critical.IndexOf("%")), CultureInfo.InvariantCulture.NumberFormat);
+                        this.critical = this.max * (percent / 100);
+                    }
+                    else
+                    {
+                        throw new Exception(message: "Can not calculate % of max because is none.");
+                    }
+                }
+                else
+                {
+                    this.critical = float.Parse(critical, CultureInfo.InvariantCulture.NumberFormat);
+                }
+                //Counter will be checked.
+                check = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error parsing warning and critical.");
+                throw (e);
+            }
+        }
+        //if warning and critical are "none" counter will not check 
+        else
+        {
+            this.warning = 0;
+            this.critical = 0;
+            check = false;
         }
     }
     /// <summary>

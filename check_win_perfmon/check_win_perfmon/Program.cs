@@ -12,7 +12,7 @@ namespace check_win_perfmon
     /// </summary>
     class Options
     {
-        [Option('f', "xmlFile", DefaultValue = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
+        [Option('f', "xmlFile", DefaultValue = "PerfMonMem.xml", HelpText = "XML file with performance counters to check.")]
         public string XmlFile { get; set; }
 
         [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from perfmon.")]
