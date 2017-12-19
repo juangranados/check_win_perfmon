@@ -7,7 +7,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
-[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.1/check_win_perfmon.zip) Check Win Perfmon v1.1. 
+[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.2/check_win_perfmon.zip) Check Win Perfmon v1.2. 
 
 Please read below prior use it! 
 
@@ -24,6 +24,10 @@ In downloaded zip package, there are several .xml files preconfigured:
 * ***PerfMonMem.xml***: Performance Counters to check Memory (RAM and virtual) load.
 
 * ***PerfMonMSQL.xml***: Performance Counters to check Microsoft SQL Server.
+
+* ***PerfMonWebService.xml***: Performance Counters to check Microsoft IIS Web Service.
+
+* ***PerfMonPrinter.xml***: Performance Counters to check Microsoft Print Server.
 
 Examples
 --------
@@ -53,6 +57,8 @@ OK - All performance counters between range | 'TotalServerMemory'=8381528KB;1468
 ***Values and counters are based on System Center Operations Manager checkins. You can check it out [here](http://mpwiki.viacode.com/default.aspx?g=posts&t=219816).***
 
 ***Values and counters for Microsoft SQL are based on articles from [SLQ Shack](https://www.sqlshack.com/sql-server-memory-performance-metrics-part-1-memory-pagessec-memory-page-faultssec/) and [Database Journal](http://www.databasejournal.com/features/mssql/article.php/3932406/Top-10-SQL-Server-Counters-for-Monitoring-SQL-Server-Performance.htm).***
+
+***Updated tresholds based on the amazing tool PAL created by Clint Huffman of Microsoft [PAL](https://github.com/clinthuffman/PAL). 
 
 
 Usage
