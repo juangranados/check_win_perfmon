@@ -58,7 +58,7 @@ OK - All performance counters between range | 'TotalServerMemory'=8381528KB;1468
 
 ***Values and counters for Microsoft SQL are based on articles from [SLQ Shack](https://www.sqlshack.com/sql-server-memory-performance-metrics-part-1-memory-pagessec-memory-page-faultssec/) and [Database Journal](http://www.databasejournal.com/features/mssql/article.php/3932406/Top-10-SQL-Server-Counters-for-Monitoring-SQL-Server-Performance.htm).***
 
-***Updated tresholds based on the amazing tool PAL created by Clint Huffman of Microsoft [PAL](https://github.com/clinthuffman/PAL). 
+***Updated tresholds based on the amazing tool [PAL](https://github.com/clinthuffman/PAL) created by Clint Huffman from Microsoft.*** 
 
 
 Usage
