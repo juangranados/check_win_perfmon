@@ -80,7 +80,7 @@ public class PerfCounter
                 if (instanceName == "auto")
                 {
                     //Detect best network interface
-                    if (categoryName == "Network Interface")
+                    if ((categoryName == "Network Interface") || (categoryName == "Network Adapter"))
                     {
                         var tempInstanceName = Utils.GetNetworkInterface().Description;
                         tempInstanceName = tempInstanceName.Replace('#', '_');
@@ -95,7 +95,7 @@ public class PerfCounter
                     }
                     else
                     {
-                        throw new Exception(message: "Parameter auto not supported for this counter instance.");
+                        throw new Exception(message: $"Parameter auto not supported for {categoryName} counter instance.");
                     }
                 }
                 performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName, true);
