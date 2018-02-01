@@ -82,7 +82,11 @@ public class PerfCounter
                     //Detect best network interface
                     if (categoryName == "Network Interface")
                     {
-                        instanceName = Utils.GetNetworkInterface().Description.Replace('#','_');
+                        var tempInstanceName = Utils.GetNetworkInterface().Description;
+                        tempInstanceName = tempInstanceName.Replace('#', '_');
+                        tempInstanceName = tempInstanceName.Replace('(', '[');
+                        tempInstanceName = tempInstanceName.Replace(')', ']');
+                        instanceName = tempInstanceName;
                     }
                     //Detect disk 0
                     else if (categoryName == "PhysicalDisk")
