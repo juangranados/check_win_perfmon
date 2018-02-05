@@ -129,7 +129,7 @@ In the example above, program will check two counters. For each counter, we need
 
 * **category:** Category of performance counter
 * **name:** Name of the performance counter.
-* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
+* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check. This value can be auto for Physical Disk category too, program will autodetect physical disk 0. 
 * **friendlyname:** name of performance counter which program returns in output.
 * **units:** units program returns in output.
 * **warning:** Warning threshold for performance counter.
