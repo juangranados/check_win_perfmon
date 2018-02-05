@@ -153,9 +153,16 @@ public class PerfCounter
         //Parse max into float
         if (max != "none")
         {
-            if (max == "automemory")
+            if (max == "auto")
             {
-                this.max = Utils.GetTotalMemory(units);
+                if (categoryName == "Memory")
+                {
+                    this.max = Utils.GetTotalMemory(units);
+                }
+                else if ((categoryName == "Network Interface") || (categoryName == "Network Adapter"))
+                {
+                    this.max = Utils.GetNetworkInterfaceSpeed(instanceName);
+                }
             }
            else
             {

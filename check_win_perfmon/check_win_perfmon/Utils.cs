@@ -96,4 +96,16 @@ internal class Utils
         }
         return "_total";
     }
+    static public float GetNetworkInterfaceSpeed(string name)
+    {
+        NetworkInterface networkInterface = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.Description == name).SingleOrDefault();
+        if (networkInterface != null)
+        {
+            return networkInterface.Speed/8;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 }
