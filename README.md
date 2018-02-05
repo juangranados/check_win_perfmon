@@ -7,7 +7,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
-[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.2/check_win_perfmon.zip) Check Win Perfmon v1.2. 
+[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.3/check_win_perfmon.zip) Check Win Perfmon v1.3. 
 
 Please read below prior use it! 
 
