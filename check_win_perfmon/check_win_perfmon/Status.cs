@@ -1,15 +1,17 @@
-﻿/// <summary>
-/// Class to store status of final message
-/// </summary>
-public class Status
+﻿namespace check_win_perfmon
 {
-    private bool critical;
-    private bool warning;
-    public Status()
+    /// <summary>
+    /// Class to store status of final message
+    /// </summary>
+    public class Status
     {
-        Critical = false;
-        Warning = false;
+        public Status()
+        {
+            Critical = false;
+            Warning = false;
+        }
+        public bool Critical { get; set; }
+
+        public bool Warning { get; set; }
     }
-    public bool Critical { get => critical; set { critical = value; } }
-    public bool Warning { get => warning; set => warning = value; }
 }

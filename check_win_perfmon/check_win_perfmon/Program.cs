@@ -1,54 +1,20 @@
 ﻿// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
 // Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
 using System;
-using CommandLine;
 using System.Xml;
 using System.Collections.Generic;
 using System.Diagnostics;
 namespace check_win_perfmon
 {
     /// <summary>
-    /// Program arguments
-    /// </summary>
-    class Options
-    {
-        [Option('f', "xmlFile", DefaultValue = "PerfMonNetwork.xml", HelpText = "XML file with performance counters to check.")]
-        public string XmlFile { get; set; }
-
-        [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from perfmon.")]
-        public int MaxSamples { get; set; }
-
-        [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
-        public int TimeSamples { get; set; }
-
-        [Option('v', "verbose", HelpText = "Verbose output to debug.")]
-        public bool Verbose { get; set; }
-
-        [HelpOption]
-        public string GetUsage()
-        {
-            var help = new CommandLine.Text.HelpText
-            {
-                Heading = new CommandLine.Text.HeadingInfo("Check Win Perfmon", "1.0\n"),
-                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2017),
-                AdditionalNewLineAfterOption = true,
-                AddDashesToOption = true
-            };
-            help.AddPreOptionsLine("GNU General Public License 3.0\n");
-            help.AddPreOptionsLine("Usage: check_win_perfmon.exe params:\n");
-            help.AddOptions(this);
-            return help;
-        }
-    }
-    /// <summary>
     /// Load xml file with performance counters and their threshholds.
     /// Check performance counters aganist tresholds.
     /// Print performance info in Icinga/Nagios format
     /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
     /// </summary>
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //Set lower priority for the process
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
@@ -61,42 +27,57 @@ namespace check_win_perfmon
             var options = new Options();
             CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
             //Exit code
-            int exitCode = 0;
+            var exitCode = 0;
             //Performance output of all counters
-            string perfOutput = " | ";
+            var perfOutput = " | ";
             //Program output
             string output = null;
-
             //List of PerfCounter
-            List<PerfCounter> perfCounters = new List<PerfCounter>();
+            var perfCounters = new List<PerfCounter>();
             //Status class to store final status
-            Status status = new Status();
+            var status = new Status();
             //Read XML
             try
             {
                 //Load XML document
-                XmlDocument doc = new XmlDocument();
+                var doc = new XmlDocument();
                 doc.Load(options.XmlFile);
-                XmlElement root = doc.DocumentElement;
-                XmlNodeList nodes = root.SelectNodes("perfcounter");
-                foreach (XmlNode node in nodes)
+                var root = doc.DocumentElement;
+                if (root != null)
                 {
-                    //Generate PerfCounter list with all perfcounters in XML file
+                    var nodes = root.SelectNodes("perfcounter");
+                    if (nodes != null)
+                    {
+                        foreach (XmlNode node in nodes)
+                        {
+                            //Generate PerfCounter list with all perfcounters in XML file
 
-                    perfCounters.Add(
-                        new PerfCounter(
-                            node.SelectSingleNode("category").InnerText,
-                            node.SelectSingleNode("name").InnerText,
-                            node.SelectSingleNode("instance").InnerText,
-                            node.SelectSingleNode("friendlyname").InnerText,
-                            node.SelectSingleNode("units").InnerText,
-                            node.SelectSingleNode("warning").InnerText,
-                            node.SelectSingleNode("critical").InnerText,
-                            node.SelectSingleNode("min").InnerText,
-                            node.SelectSingleNode("max").InnerText,
-                            status, options.MaxSamples, options.Verbose
-                        )
-                    );
+                            perfCounters.Add(
+                                new PerfCounter(
+                                    node.SelectSingleNode("category")?.InnerText,
+                                    node.SelectSingleNode("name")?.InnerText,
+                                    node.SelectSingleNode("instance")?.InnerText,
+                                    node.SelectSingleNode("friendlyname")?.InnerText,
+                                    node.SelectSingleNode("units")?.InnerText,
+                                    node.SelectSingleNode("warning")?.InnerText,
+                                    node.SelectSingleNode("critical")?.InnerText,
+                                    node.SelectSingleNode("min")?.InnerText,
+                                    node.SelectSingleNode("max")?.InnerText,
+                                    status, options.MaxSamples, options.Verbose
+                                )
+                            );
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error loading xml file.");
+                        Environment.Exit(3);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Error loading xml file.");
+                    Environment.Exit(3);
                 }
             }
             catch (Exception e)
@@ -105,9 +86,9 @@ namespace check_win_perfmon
                 Environment.Exit(3);
             }
             //Generate options.maxSamples +1 (for initializing counter) values for each PerfCounter
-            for (int i = 0; i <= options.MaxSamples; i++)
+            for (var i = 0; i <= options.MaxSamples; i++)
             {
-                foreach (PerfCounter perfCounter in perfCounters)
+                foreach (var perfCounter in perfCounters)
                 {
                     try
                     {
@@ -123,7 +104,7 @@ namespace check_win_perfmon
                 System.Threading.Thread.Sleep(options.TimeSamples);
             }
             //Get output of PerfCounters
-            foreach (PerfCounter perfCounter in perfCounters)
+            foreach (var perfCounter in perfCounters)
             {
                 //Get performance output
                 perfOutput = perfOutput + perfCounter.PerfString;
