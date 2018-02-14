@@ -7,7 +7,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
-[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.2/check_win_perfmon.zip) Check Win Perfmon v1.2. 
+[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.3/check_win_perfmon.zip) Check Win Perfmon v1.3. 
 
 Please read below prior use it! 
 
@@ -28,6 +28,8 @@ In downloaded zip package, there are several .xml files preconfigured:
 * ***PerfMonWebService.xml***: Performance Counters to check Microsoft IIS Web Service.
 
 * ***PerfMonPrinter.xml***: Performance Counters to check Microsoft Print Server.
+
+* ***PerfMonCB.xml***: Performance Counters to check Microsoft Connection Broker Server.
 
 Examples
 --------
@@ -127,13 +129,13 @@ In the example above, program will check two counters. For each counter, we need
 
 * **category:** Category of performance counter
 * **name:** Name of the performance counter.
-* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check.
+* **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check. This value can be auto for Physical Disk category too, program will autodetect physical disk 0. 
 * **friendlyname:** name of performance counter which program returns in output.
 * **units:** units program returns in output.
 * **warning:** Warning threshold for performance counter.
 * **critical:** Critical threshold for performance counter.
 * **min:** minimum value of performance counter. If you do not know the minimum value, it has to be: none.
-* **max:** maximum value of performance counter.  If you do not know the maximum value, it has to be: none. This value can be auto for Memory category, program will detect the amount of memory installed on system.
+* **max:** maximum value of performance counter.  If you do not know the maximum value, it has to be: none. This value can be auto for Memory category and Network Interface/Adapter category, program will detect the amount of memory installed on system or network interface speed on bytes/s.
 
 If max and min are specified, program returns one more result for percent value.
 Max and min must have different value.
