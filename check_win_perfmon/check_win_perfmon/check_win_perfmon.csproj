@@ -84,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Options.cs" />
     <Compile Include="PerfCounter.cs" />
+    <Compile Include="PerfCounterList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Status.cs" />

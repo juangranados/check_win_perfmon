@@ -1,8 +1,6 @@
 ﻿// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
 // Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
 using System;
-using System.Xml;
-using System.Collections.Generic;
 using System.Diagnostics;
 namespace check_win_perfmon
 {
@@ -26,130 +24,36 @@ namespace check_win_perfmon
             //Initializing arguments
             var options = new Options();
             CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
-            //Exit code
-            var exitCode = 0;
-            //Performance output of all counters
-            var perfOutput = " | ";
-            //Program output
-            string output = null;
-            //List of PerfCounter
-            var perfCounters = new List<PerfCounter>();
-            //Status class to store final status
-            var status = new Status();
-            //Read XML
+            //Output message
+            string outputMessage;
+            //List of performance monitors class
+            PerfCounterList perfCounterList = null;
             try
             {
-                //Load XML document
-                var doc = new XmlDocument();
-                doc.Load(options.XmlFile);
-                var root = doc.DocumentElement;
-                if (root != null)
-                {
-                    var nodes = root.SelectNodes("perfcounter");
-                    if (nodes != null)
-                    {
-                        foreach (XmlNode node in nodes)
-                        {
-                            //Generate PerfCounter list with all perfcounters in XML file
-
-                            perfCounters.Add(
-                                new PerfCounter(
-                                    node.SelectSingleNode("category")?.InnerText,
-                                    node.SelectSingleNode("name")?.InnerText,
-                                    node.SelectSingleNode("instance")?.InnerText,
-                                    node.SelectSingleNode("friendlyname")?.InnerText,
-                                    node.SelectSingleNode("units")?.InnerText,
-                                    node.SelectSingleNode("warning")?.InnerText,
-                                    node.SelectSingleNode("critical")?.InnerText,
-                                    node.SelectSingleNode("min")?.InnerText,
-                                    node.SelectSingleNode("max")?.InnerText,
-                                    status, options.Verbose
-                                )
-                            );
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error loading xml file.");
-                        Environment.Exit(3);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Error loading xml file.");
-                    Environment.Exit(3);
-                }
+                perfCounterList = new PerfCounterList(options.XmlFile, options.Verbose, options.MaxSamples, options.TimeSamples);
+                perfCounterList.Calculate();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error loading xml file.");
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 Environment.Exit(3);
             }
-            //Generate options.maxSamples +1 (for initializing counters) values for each PerfCounter
-            for (var i = 0; i <= options.MaxSamples; i++)
-            {
-                foreach (var perfCounter in perfCounters)
-                {
-                    try
-                    {
-                        perfCounter.NextValue();
-                        if (i == options.MaxSamples)
-                        {
-                            //Calculate performance counter status and values
-                            perfCounter.Calculate();
-                            //Get performance output
-                            perfOutput = perfOutput + perfCounter.PerfString;
-                            //Check if PerfCounter is out of range
-                            if (perfCounter.ResultString != null)
-                            {
-                                //Get the error
-                                output = output + perfCounter.ResultString + " ";
-                            }
-                            //Dispose object   
-                            perfCounter.Dispose();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                        Environment.Exit(3);
-                    }
-                }
-                //Sleep options.TimeSamples only until calculate
-                if (i < options.MaxSamples)
-                {
-                    System.Threading.Thread.Sleep(options.TimeSamples);
-                }
-            }
-
+            
             //No errors in PerfCounter, all counters are between ranges
-            if (output == null)
+            if (perfCounterList.GetStatus() == "Ok")
             {
-                output = $"OK - All performance counters between range{perfOutput.TrimEnd()}";
+                outputMessage = $"Ok - All performance counters between range{perfCounterList.PerfOutput}";
             }
             //Some counters has values out of tresholds
             else
             {
                 //Generate output with errors and performance data
-                output = output.TrimEnd() + perfOutput.TrimEnd();
-                //Status critical
-                if (status.Critical)
-                {
-                    output = $"Critical - {output}";
-                    exitCode = 2;
-                }
-                //Status warning
-                else if (status.Warning)
-                {
-                    output = $"Warning - {output}";
-                    exitCode = 1;
-                }
+                outputMessage = $"{perfCounterList.GetStatus()} - {perfCounterList.Output + perfCounterList.PerfOutput}";   
             }
             //Print result
-            Console.WriteLine(output);
+            Console.WriteLine(outputMessage);
             //Exit code for monitoring software
-            Environment.Exit(exitCode);
+            Environment.Exit(perfCounterList.GetExitCode());
         }
     }
 }
