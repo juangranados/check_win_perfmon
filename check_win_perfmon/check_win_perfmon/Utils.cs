@@ -101,7 +101,7 @@ namespace check_win_perfmon
             var networkInterface = NetworkInterface.GetAllNetworkInterfaces().SingleOrDefault(x => x.Description == name);
             if (networkInterface != null)
             {
-                return networkInterface.Speed/8;
+                return (float)networkInterface.Speed/8;
             }
             return 0;
         }

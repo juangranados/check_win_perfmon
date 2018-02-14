@@ -181,7 +181,7 @@ namespace check_win_perfmon
                         if  (_max != -1)
                         {
                             var percent = float.Parse(warning.Substring(0, warning.IndexOf("%", StringComparison.Ordinal)), CultureInfo.InvariantCulture.NumberFormat);
-                            _warning = _max * (percent / 100);
+                            _warning = (_max * percent) / 100;
                         }
                         else
                         {
@@ -198,7 +198,7 @@ namespace check_win_perfmon
                         if (_max != -1)
                         {
                             var percent = float.Parse(critical.Substring(0, critical.IndexOf("%", StringComparison.Ordinal)), CultureInfo.InvariantCulture.NumberFormat);
-                            _critical = _max * (percent / 100);
+                            _critical = (_max * percent) / 100;
                         }
                         else
                         {
