@@ -7,6 +7,7 @@ namespace check_win_perfmon
     /// <summary>
     /// Class to manage performance counter list, generate and calculate output in Icinga/Nagios format.
     /// </summary>
+    /// Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
     internal class PerfCounterList
     {
         public string PerfOutput { get; private set; } = " | ";

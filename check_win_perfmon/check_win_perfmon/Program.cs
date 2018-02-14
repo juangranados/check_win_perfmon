@@ -1,6 +1,4 @@
-﻿// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
-// Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
-using System;
+﻿using System;
 using System.Diagnostics;
 namespace check_win_perfmon
 {
@@ -9,6 +7,7 @@ namespace check_win_perfmon
     /// Check performance counters aganist tresholds.
     /// Print performance info in Icinga/Nagios format
     /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
+    /// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
     /// </summary>
     internal class Program
     {

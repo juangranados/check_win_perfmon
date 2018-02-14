@@ -5,7 +5,7 @@
     /// </summary>
     public class Status
     {
-        public StatusEnum StatusMessage { get; private set; } = StatusEnum.Ok;
+        private StatusEnum StatusMessage { get; set; } = StatusEnum.Ok;
 
         public void SetWarning()
         {
@@ -18,6 +18,11 @@
         public void SetCritical()
         {
             StatusMessage = StatusEnum.Critical;
+        }
+
+        public void SetOk()
+        {
+            StatusMessage = StatusEnum.Ok;
         }
 
         public int GetExitCode()
