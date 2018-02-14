@@ -63,7 +63,7 @@ namespace check_win_perfmon
                                     node.SelectSingleNode("critical")?.InnerText,
                                     node.SelectSingleNode("min")?.InnerText,
                                     node.SelectSingleNode("max")?.InnerText,
-                                    status, options.MaxSamples, options.Verbose
+                                    status, options.Verbose
                                 )
                             );
                         }
@@ -82,10 +82,11 @@ namespace check_win_perfmon
             }
             catch (Exception e)
             {
+                Console.WriteLine("Error loading xml file.");
                 Console.WriteLine(e.Message);
                 Environment.Exit(3);
             }
-            //Generate options.maxSamples +1 (for initializing counter) values for each PerfCounter
+            //Generate options.maxSamples +1 (for initializing counters) values for each PerfCounter
             for (var i = 0; i <= options.MaxSamples; i++)
             {
                 foreach (var perfCounter in perfCounters)
@@ -93,6 +94,21 @@ namespace check_win_perfmon
                     try
                     {
                         perfCounter.NextValue();
+                        if (i == options.MaxSamples)
+                        {
+                            //Calculate performance counter status and values
+                            perfCounter.Calculate();
+                            //Get performance output
+                            perfOutput = perfOutput + perfCounter.PerfString;
+                            //Check if PerfCounter is out of range
+                            if (perfCounter.ResultString != null)
+                            {
+                                //Get the error
+                                output = output + perfCounter.ResultString + " ";
+                            }
+                            //Dispose object   
+                            perfCounter.Dispose();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -100,23 +116,13 @@ namespace check_win_perfmon
                         Environment.Exit(3);
                     }
                 }
-                //Sleep options.TimeSamples
-                System.Threading.Thread.Sleep(options.TimeSamples);
-            }
-            //Get output of PerfCounters
-            foreach (var perfCounter in perfCounters)
-            {
-                //Get performance output
-                perfOutput = perfOutput + perfCounter.PerfString;
-                //Check if PerfCounter is out of range
-                if (perfCounter.ResultString != null)
+                //Sleep options.TimeSamples only until calculate
+                if (i < options.MaxSamples)
                 {
-                    //Get the error
-                    output = output + perfCounter.ResultString + " ";
+                    System.Threading.Thread.Sleep(options.TimeSamples);
                 }
-                //Dispose object   
-                perfCounter.Dispose();
             }
+
             //No errors in PerfCounter, all counters are between ranges
             if (output == null)
             {

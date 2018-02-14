@@ -19,7 +19,6 @@ namespace check_win_perfmon
         private float _min;
         private float _max;
         private readonly Status _status;
-        private readonly int _samples;
         private readonly bool _check;
         private int _samplesCount;
         private float _result;
@@ -31,12 +30,12 @@ namespace check_win_perfmon
         /// <summary>
         /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
         /// </summary>
-        public string ResultString { get; set; }
+        public string ResultString { get; private set; }
 
         /// <summary>
         /// Get and set for perfstring, string that contains performance data in Icinga/Nagios format
         /// </summary>
-        public string PerfString { get; set; }
+        public string PerfString { get; private set; }
 
         /// <summary>
         /// Constructor od class PerfCounter
@@ -51,13 +50,11 @@ namespace check_win_perfmon
         /// <param name="min">Minumal value of performance counter</param>
         /// <param name="max">Max value of performance counter.</param>
         /// <param name="status">Status class to store overall status of checks</param>
-        /// <param name="samples">Number of performance samples to take</param>
         /// <param name="verbose">Enable verbose output</param>
-        public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, Status status, int samples,bool verbose = false)
+        public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, Status status,bool verbose = false)
         {
             //Initializing variables
             _status = status;
-            _samples = samples;
             _verbose = verbose;
 
             //Show performance counter creation
@@ -175,40 +172,9 @@ namespace check_win_perfmon
             {
                 try
                 {
-                    //warning
-                    if (warning.Contains('%'))
-                    {
-                        if  (_max != -1)
-                        {
-                            var percent = float.Parse(warning.Substring(0, warning.IndexOf("%", StringComparison.Ordinal)), CultureInfo.InvariantCulture.NumberFormat);
-                            _warning = (_max * percent) / 100;
-                        }
-                        else
-                        {
-                            throw new Exception("Can not calculate % of max because is none.");
-                        }
-                    }
-                    else
-                    {
-                        _warning = float.Parse(warning, CultureInfo.InvariantCulture.NumberFormat);
-                    }
-                    //Critical
-                    if (critical.Contains('%'))
-                    {
-                        if (_max != -1)
-                        {
-                            var percent = float.Parse(critical.Substring(0, critical.IndexOf("%", StringComparison.Ordinal)), CultureInfo.InvariantCulture.NumberFormat);
-                            _critical = (_max * percent) / 100;
-                        }
-                        else
-                        {
-                            throw new Exception("Can not calculate % of max because is none.");
-                        }
-                    }
-                    else
-                    {
-                        _critical = float.Parse(critical, CultureInfo.InvariantCulture.NumberFormat);
-                    }
+                    ParseIntoFloat(warning,out _warning);
+                    ParseIntoFloat(critical, out _critical);
+
                     //Counter will be checked.
                     _check = true;
                 }
@@ -226,51 +192,83 @@ namespace check_win_perfmon
                 _check = false;
             }
         }
+
+        private void ParseIntoFloat(string value, out float field)
+        {
+            if (value.Contains('%'))
+            {
+                if (_max != -1)
+                {
+                    var percent = float.Parse(value.Substring(0, value.IndexOf("%", StringComparison.Ordinal)),
+                        CultureInfo.InvariantCulture.NumberFormat);
+                    field = (_max * percent) / 100;
+                }
+                else
+                {
+                    throw new Exception("Can not calculate % of max because is none.");
+                }
+            }
+            else
+            {
+                field = float.Parse(value, CultureInfo.InvariantCulture.NumberFormat);
+            }
+        }
+
         /// <summary>
-        /// Calculate value of a counter and generate result if last sample is reached
-        /// </summary>
-        public void NextValue()
+            /// Calculate value of a counter and generate result if last sample is reached
+            /// </summary>
+            public void NextValue()
         {
             //Some counters returns zero on first value because they need two values in order to be calculated.
             if (!_initialized)
             {
-                //Initialice counter
-                _performanceCounter.NextValue();
-                _initialized = true;
-                WriteVerbose($"Initialized performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
+               Initialize(); 
             }
             //Counter already initialized
             else
             {
-                //One sample more taken
-                _samplesCount = _samplesCount + 1;
                 //Add value to total result
                 try
                 {
                     _nextValue = _performanceCounter.NextValue();
                     WriteVerbose($"Next value of performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}: {_nextValue}");
                     _result = _result + _nextValue;
+                    _samplesCount = _samplesCount + 1;
                 }
                 catch (Exception)
                 {
                     Console.WriteLine($"Error on counter {_performanceCounter.CounterName}");
                     throw;
                 }
-                //Last sample taken
-                if (_samples == _samplesCount)
-                {
-                    WriteVerbose($"Last sample of {_samples} taken for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
-                    //Calculate average of samples
-                    _result = _result / _samples;
-                    CalculatePerformance();
-                    //Check status of a counter
-                    if (_check)
-                    {
-                        CalculateStatus();
-                    }
-                }
             }
         }
+        /// <summary>
+        /// Initialize performance counter for new calculations
+        /// </summary>
+        public void Initialize()
+        {
+            _performanceCounter.NextValue();
+            _initialized = true;
+            _samplesCount = 0;
+            _result = 0;
+            WriteVerbose($"Initialized performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
+        }
+        /// <summary>
+        /// Calculate performance and status
+        /// </summary>
+        public void Calculate()
+        {
+            WriteVerbose($"{_samplesCount} samples taken for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}. Calculating performance and status.");
+            //Calculate average of samples
+            _result = _result / _samplesCount;
+            CalculatePerformance();
+            //Check status of a counter
+            if (_check)
+            {
+                CalculateStatus();
+            }
+        }
+
         /// <summary>
         /// Calculate performance output and saves it in perfString
         /// </summary>
@@ -333,14 +331,14 @@ namespace check_win_perfmon
                     //Change global status to critical
                     _status.Critical = true;
                     //Generate error message
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4).ToString(Format)} critical.";
+                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} critical.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
                 }
                 //Status warning
                 else if (_result >= _warning)
                 {
                     _status.Warning = true;
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4).ToString(Format)} warning.";
+                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} warning.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
                 }
                 else
