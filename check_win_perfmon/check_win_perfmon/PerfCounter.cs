@@ -329,7 +329,7 @@ namespace check_win_perfmon
                 if (_result >= _critical)
                 {
                     //Change global status to critical
-                    _status.Critical = true;
+                    _status.SetCritical();
                     //Generate error message
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} critical.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
@@ -337,7 +337,7 @@ namespace check_win_perfmon
                 //Status warning
                 else if (_result >= _warning)
                 {
-                    _status.Warning = true;
+                    _status.SetWarning();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} warning.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
                 }
@@ -353,14 +353,14 @@ namespace check_win_perfmon
                 //Status critical
                 if (_result <= _critical)
                 {
-                    _status.Critical = true;
+                    _status.SetCritical();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} critical.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_critical} -> status critical");
                 }
                 //Status warning
                 else if (_result <= _warning)
                 {
-                    _status.Warning = true;
+                    _status.SetWarning();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} warning.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_warning} -> status warning");
                 }
