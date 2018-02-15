@@ -18,7 +18,7 @@ namespace check_win_perfmon
         private readonly float _critical;
         private float _min;
         private float _max;
-        private readonly Status _status;
+        public NagiosStatus CounterStatus { get; } = new NagiosStatus();
         private readonly bool _check;
         private int _samplesCount;
         private float _result;
@@ -26,7 +26,7 @@ namespace check_win_perfmon
         private bool _disposed;
         private static readonly string Format = "0." + new string('#', 324);
         private readonly bool _verbose;
-        private float _nextValue;
+
         /// <summary>
         /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
         /// </summary>
@@ -49,29 +49,25 @@ namespace check_win_perfmon
         /// <param name="critical">Critical threshold of performance counter</param>
         /// <param name="min">Minumal value of performance counter</param>
         /// <param name="max">Max value of performance counter.</param>
-        /// <param name="status">Status class to store overall status of checks</param>
         /// <param name="verbose">Enable verbose output</param>
-        public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, Status status,bool verbose = false)
+        public PerfCounter(string categoryName, string counterName, string instanceName, string friendlyName, string units, string warning, string critical, string min, string max, bool verbose = false)
         {
-            //Initializing variables
-            _status = status;
             _verbose = verbose;
-
             //Show performance counter creation
             WriteVerbose($"Creating performance counter class for: \\{categoryName}\\{counterName}\\{instanceName}");
 
             //All paramenters must have value
             if (categoryName == null || counterName == null || instanceName == null || friendlyName == null || units == null || warning == null || critical == null || min == null || max == null)
             {
-                var e = new Exception($"Incorrect format in xml or empty values for counter {counterName}. Please, check xml file.");
-                throw e;
+                throw new ArgumentNullException($"Incorrect format/values in xml for counter {counterName}. Please, check xml file.");
             }
+
             //Min and max can not be the same
-            if (min == max && min != "none" && max != "none")
+            if (min == max && min != "none")
             {
-                var e = new Exception($"Min and max can not be the same on counter {counterName}");
-                throw e;
+                throw new ArgumentException($"Min and max can not be the same on counter {counterName}");
             }
+
             try
             {
                 //Performance counter with instance
@@ -80,25 +76,26 @@ namespace check_win_perfmon
                     //Try to detect instance
                     if (instanceName == "auto")
                     {
-                        //Detect best network interface
-                        if (categoryName == "Network Interface" || categoryName == "Network Adapter")
+                        WriteVerbose($"Detecting instance for: \\{categoryName}\\{counterName}");
+                        switch (categoryName)
                         {
-                            var tempInstanceName = Utils.GetNetworkInterface().Description;
-                            tempInstanceName = tempInstanceName.Replace('#', '_');
-                            tempInstanceName = tempInstanceName.Replace('(', '[');
-                            tempInstanceName = tempInstanceName.Replace(')', ']');
-                            instanceName = tempInstanceName;
-                        }
-                        //Detect disk 0
-                        else if (categoryName == "PhysicalDisk")
-                        {
-                            instanceName = Utils.GetDiskName();
-                        }
-                        else
-                        {
-                            throw new Exception($"Parameter auto not supported for {categoryName} counter instance.");
+                            case "Network Interface":
+                            case "Network Adapter":
+                                var tempInstanceName = Utils.GetNetworkInterface().Description;
+                                tempInstanceName = tempInstanceName.Replace('#', '_');
+                                tempInstanceName = tempInstanceName.Replace('(', '[');
+                                tempInstanceName = tempInstanceName.Replace(')', ']');
+                                instanceName = tempInstanceName;
+                                break;
+                            case "PhysicalDisk":
+                                instanceName = Utils.GetDiskName();
+                                break;
+                            default:
+                                throw new ArgumentException(
+                                    $"Parameter auto not supported for {categoryName} counter instance.", instanceName);
                         }
                     }
+                    WriteVerbose($"{instanceName} detected");
                     _performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName, true);
                 }
                 //Performance counter without instance
@@ -108,14 +105,13 @@ namespace check_win_perfmon
                 }
                 WriteVerbose($"Created read only performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine($"{counterName} is invalid");
-                throw;
+                throw new ApplicationException($"\\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} is invalid: " + e.Message);
             }
             //Assign friendly name without spaces or non ascii characters
             _friendlyName = Regex.Replace(friendlyName != "none" ? friendlyName : counterName, @"[^A-Za-z0-9]+", "");
-            //Counter does have measure units
+            //Check if counter has measure units
             _units = units != "none" ? units : "";
             //Parse min into float
             if (min != "none")
@@ -126,8 +122,7 @@ namespace check_win_perfmon
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("Error parsing min. Please, check it is a number.");
-                    throw;
+                    throw new ArgumentException($"Error parsing min in counter {counterName}. Please, check it is a number.", min);
                 }
             }
             //No min specified
@@ -136,18 +131,25 @@ namespace check_win_perfmon
                 _min = -1;
             }
             //Parse max into float
-            if (max != "none")
+            if (max != "none" && max != "0")
             {
                 if (max == "auto")
                 {
-                    if (categoryName == "Memory")
+                    WriteVerbose($"Detecting max for: \\{categoryName}\\{counterName}\\{instanceName}");
+                    switch (categoryName)
                     {
-                        _max = Utils.GetTotalMemory(units);
+                        case "Memory":
+                        case "SQLServer:Memory Manager":
+                            _max = Utils.GetTotalMemory(units);
+                            break;
+                        case "Network Interface":
+                        case "Network Adapter":
+                            _max = Utils.GetNetworkInterfaceSpeed(instanceName);
+                            break;
+                        default:
+                            throw new ArgumentException($"Parameter auto not supported for max in counter {counterName}.",max);
                     }
-                    else if (categoryName == "Network Interface" || categoryName == "Network Adapter")
-                    {
-                        _max = Utils.GetNetworkInterfaceSpeed(instanceName);
-                    }
+                    WriteVerbose($"Detected max of: {_max} for: \\{categoryName}\\{counterName}\\{instanceName}");
                 }
                 else
                 {
@@ -157,8 +159,7 @@ namespace check_win_perfmon
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine("Error parsing max. Please, check it is a number.");
-                        throw;
+                        throw new ArgumentException($"Error parsing max in counter {counterName}. Please, check it is a number.",max);
                     }
                 }
             }
@@ -170,21 +171,13 @@ namespace check_win_perfmon
             //Parse warning and critical into float
             if (warning != "none" && critical != "none")
             {
-                try
-                {
-                    ParseIntoFloat(warning,out _warning);
-                    ParseIntoFloat(critical, out _critical);
+                ParseIntoFloat(warning,out _warning);
+                ParseIntoFloat(critical, out _critical);
 
-                    //Counter will be checked.
-                    _check = true;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Error parsing warning and critical.");
-                    throw;
-                }
+                //Counter will be checked.
+                _check = true;
             }
-            //if warning and critical are "none" counter will not check 
+            //if warning or critical are "none" counter will not check 
             else
             {
                 _warning = 0;
@@ -197,15 +190,15 @@ namespace check_win_perfmon
         {
             if (value.Contains('%'))
             {
-                if (_max != -1)
+                if (_max > 0)
                 {
                     var percent = float.Parse(value.Substring(0, value.IndexOf("%", StringComparison.Ordinal)),
                         CultureInfo.InvariantCulture.NumberFormat);
-                    field = (_max * percent) / 100;
+                    field = _max * percent / 100;
                 }
                 else
                 {
-                    throw new Exception("Can not calculate % of max because is none.");
+                    throw new ArgumentException($"Can not calculate % of max because is none or zero in counter {_friendlyName}.");
                 }
             }
             else
@@ -217,30 +210,18 @@ namespace check_win_perfmon
         /// <summary>
             /// Calculate value of a counter and generate result if last sample is reached
             /// </summary>
-            public void NextValue()
+        public void NextValue()
         {
             //Some counters returns zero on first value because they need two values in order to be calculated.
             if (!_initialized)
             {
-               Initialize(); 
+                throw new ApplicationException($"Counter {_friendlyName} has not been inicialized");
             }
-            //Counter already initialized
-            else
-            {
-                //Add value to total result
-                try
-                {
-                    _nextValue = _performanceCounter.NextValue();
-                    WriteVerbose($"Next value of performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}: {_nextValue}");
-                    _result = _result + _nextValue;
-                    _samplesCount = _samplesCount + 1;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine($"Error on counter {_performanceCounter.CounterName}");
-                    throw;
-                }
-            }
+
+            var nextValue = _performanceCounter.NextValue();
+            _result = _result + nextValue;
+            _samplesCount = _samplesCount + 1;
+            WriteVerbose($"Next value of performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}: {nextValue}");
         }
         /// <summary>
         /// Initialize performance counter for new calculations
@@ -251,6 +232,7 @@ namespace check_win_perfmon
             _initialized = true;
             _samplesCount = 0;
             _result = 0;
+            CounterStatus.Initialize();
             WriteVerbose($"Initialized performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
         }
         /// <summary>
@@ -267,6 +249,7 @@ namespace check_win_perfmon
             {
                 CalculateStatus();
             }
+            _initialized = false;
         }
 
         /// <summary>
@@ -282,7 +265,7 @@ namespace check_win_perfmon
                 _min = 0;
 
                 //Store performance output
-                PerfString = $"'{_friendlyName}'={Math.Floor(_result)}{_units};{_warning};{_critical};0;100 ";
+                PerfString = $"'{_friendlyName}'={Math.Floor(_result)}{_units};{_warning};{_critical};0;100";
             }
             //Units are not a percent
             else
@@ -300,19 +283,19 @@ namespace check_win_perfmon
                 }
                 if (_max > -1)
                 {
-                    PerfString = PerfString + $";{_max.ToString(Format)} ";
+                    PerfString = PerfString + $";{_max.ToString(Format)}";
                 }
                 else
                 {
-                    PerfString = PerfString + "; ";
+                    PerfString = PerfString + ";";
                 }
-                //If max have a value, calculate percent
+                //If max has a value, calculate percent
                 if (_max > 0)
                 {
                     //Calculate percent of result and round to zero floats
                     //Calculate percent of warning and critical and round to zero floats
                     //Add new percent to performance output
-                    PerfString = PerfString + $"'{_friendlyName}Percent'={Math.Floor(_result * 100 / _max)}%;{Math.Floor(_warning * 100 / _max)};{Math.Floor(_critical * 100 / _max)};0;100 ";
+                    PerfString = PerfString + $"'{_friendlyName}Percent'={Math.Floor(_result * 100 / _max)}%;{Math.Floor(_warning * 100 / _max)};{Math.Floor(_critical * 100 / _max)};0;100";
                 }
             }
         }
@@ -329,7 +312,7 @@ namespace check_win_perfmon
                 if (_result >= _critical)
                 {
                     //Change global status to critical
-                    _status.SetCritical();
+                    CounterStatus.SetCritical();
                     //Generate error message
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} critical.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
@@ -337,7 +320,7 @@ namespace check_win_perfmon
                 //Status warning
                 else if (_result >= _warning)
                 {
-                    _status.SetWarning();
+                    CounterStatus.SetWarning();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} warning.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
                 }
@@ -353,14 +336,14 @@ namespace check_win_perfmon
                 //Status critical
                 if (_result <= _critical)
                 {
-                    _status.SetCritical();
+                    CounterStatus.SetCritical();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} critical.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_critical} -> status critical");
                 }
                 //Status warning
                 else if (_result <= _warning)
                 {
-                    _status.SetWarning();
+                    CounterStatus.SetWarning();
                     ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(Format)} warning.";
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_warning} -> status warning");
                 }
@@ -381,7 +364,7 @@ namespace check_win_perfmon
         /// Dispose method
         /// </summary>
         /// <param name="disposing"> Is disposing</param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!_disposed)
             {

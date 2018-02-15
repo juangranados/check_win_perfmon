@@ -7,110 +7,140 @@ namespace check_win_perfmon
     /// <summary>
     /// Class to manage performance counter list, generate and calculate output in Icinga/Nagios format.
     /// </summary>
-    /// Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
+    // Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
     internal class PerfCounterList
     {
-        public string PerfOutput { get; private set; } = " | ";
-        public string Output { get; private set; }
-        private readonly List<PerfCounter> _perfCounters = new List<PerfCounter>();
-        public Status State { get; } = new Status();
-        private readonly int _samples;
-        private readonly int _timeBetweenSamples;
+        public string GlobalPerfOutput { get; private set; } = "| ";
+        public string GlobalOutput { get; private set; }
+        private List<PerfCounter> _perfCounters;
+        private NagiosStatus NagiosState { get; } = new NagiosStatus();
 
-        public PerfCounterList(string xmlFilePath,bool verbose,int samples,int timeBetweenSamples)
+        public PerfCounterList(string xmlFilePath, bool verbose = false)
         {
-            _samples = samples;
-            _timeBetweenSamples = timeBetweenSamples;
-            try
-            { 
-                var doc = new XmlDocument();
-                doc.Load(xmlFilePath);
-                var root = doc.DocumentElement;
-                if (root != null)
-                {
-                    var nodes = root.SelectNodes("perfcounter");
-                    if (nodes != null)
-                    {
-                        foreach (XmlNode node in nodes)
-                        {
-                            //Generate PerfCounter list with all perfcounters in XML file
+            LoadXml(xmlFilePath, verbose);
+        }
 
-                            _perfCounters.Add(
-                                new PerfCounter(
-                                    node.SelectSingleNode("category")?.InnerText,
-                                    node.SelectSingleNode("name")?.InnerText,
-                                    node.SelectSingleNode("instance")?.InnerText,
-                                    node.SelectSingleNode("friendlyname")?.InnerText,
-                                    node.SelectSingleNode("units")?.InnerText,
-                                    node.SelectSingleNode("warning")?.InnerText,
-                                    node.SelectSingleNode("critical")?.InnerText,
-                                    node.SelectSingleNode("min")?.InnerText,
-                                    node.SelectSingleNode("max")?.InnerText,
-                                    State, verbose
-                                )
-                            );
-                        }
-                    }
-                    else
+        private void LoadXml(string xmlFilePath, bool verbose = false)
+        {
+            if (_perfCounters != null)
+            {
+                Dispose();
+            }
+
+            _perfCounters = new List<PerfCounter>();
+            var doc = new XmlDocument();
+            doc.Load(xmlFilePath);
+            var root = doc.DocumentElement;
+            if (root != null)
+            {
+                var nodes = root.SelectNodes("perfcounter");
+                if (nodes != null)
+                    foreach (XmlNode node in nodes)
                     {
-                        Console.WriteLine("Error loading xml file.");
+                        //Generate PerfCounter list with all perfcounters in XML file
+
+                        _perfCounters.Add(
+                            new PerfCounter(
+                                node.SelectSingleNode("category")?.InnerText,
+                                node.SelectSingleNode("name")?.InnerText,
+                                node.SelectSingleNode("instance")?.InnerText,
+                                node.SelectSingleNode("friendlyname")?.InnerText,
+                                node.SelectSingleNode("units")?.InnerText,
+                                node.SelectSingleNode("warning")?.InnerText,
+                                node.SelectSingleNode("critical")?.InnerText,
+                                node.SelectSingleNode("min")?.InnerText,
+                                node.SelectSingleNode("max")?.InnerText,
+                                verbose
+                            )
+                        );
                     }
-                }
                 else
                 {
-                    Console.WriteLine("Error loading xml file.");
+                    throw new NullReferenceException("Error loading xml file. Error selecting perfcounter nodes.");
                 }
-            }   
-            catch (Exception)
+            }
+            else
             {
-                Console.WriteLine("Error loading xml file.");
-                throw;
+                throw new NullReferenceException("Error loading xml file.");
+            }
+        }
+        public void Dispose()
+        {
+            foreach (var perfCounter in _perfCounters)
+            {
+                perfCounter.Dispose();
             }
         }
 
-        public void Calculate()
+        public void Calculate(int samples,int timeBetweenSamples)
         {
-            //Generate options.maxSamples +1 (for initializing counters) values for each PerfCounter
-            for (var i = 0; i <= _samples; i++)
+            //Initialize counters
+            Initialize(timeBetweenSamples);
+            //Taking samples
+            for (var i = 0; i < samples; i++)
             {
                 foreach (var perfCounter in _perfCounters)
                 {
+                    //Take new sample
                     perfCounter.NextValue();
-                    if (i == _samples)
+
+                    //Last sample taken
+                    if (i == samples -1)
                     {
                         //Calculate performance counter status and values
                         perfCounter.Calculate();
                         //Get performance output
-                        PerfOutput = PerfOutput + perfCounter.PerfString;
-                        //Check if PerfCounter is out of range
+                        GlobalPerfOutput = GlobalPerfOutput + perfCounter.PerfString + " ";
+                        //Check if PerfCounter is out of tresholds
                         if (perfCounter.ResultString != null)
                         {
                             //Get the error
-                            Output = Output + perfCounter.ResultString + " ";
+                            GlobalOutput = GlobalOutput + perfCounter.ResultString + " ";
                         }
-                        //Dispose object   
-                        perfCounter.Dispose();
+                        //Set global status of counters
+                        SetGlobalStatus(perfCounter.CounterStatus);
                     }
                 }
-                //Only sleep before calculate
-                if (i < _samples)
+                //Only sleep before samples not after calculate
+                if (i < samples -1)
                 {
-                    System.Threading.Thread.Sleep(_timeBetweenSamples);
+                    System.Threading.Thread.Sleep(timeBetweenSamples);
                 }
             }
-
-            Output = Output?.TrimEnd();
-            PerfOutput = PerfOutput.TrimEnd();
+            //Trim spaces at the end
+            GlobalOutput = GlobalOutput?.TrimEnd();
+            GlobalPerfOutput = GlobalPerfOutput.TrimEnd();
         }
 
-        public string GetStatus()
+        private void Initialize(int timeBetweenSamples)
         {
-            return State.GetStatus();
+            foreach (var perfCounter in _perfCounters)
+            {
+                perfCounter.Initialize();
+            }
+            System.Threading.Thread.Sleep(timeBetweenSamples);
         }
 
-        public int GetExitCode()
+        private void SetGlobalStatus(NagiosStatus nagiosStatus)
         {
-            return State.GetExitCode();
+            if (nagiosStatus.GetNagiosExitCode() == 1)
+            {
+                NagiosState.SetWarning();
+            }
+            else if (nagiosStatus.GetNagiosExitCode() == 2)
+            {
+                NagiosState.SetCritical();
+            }
+        }
+
+        public string GetGlobalStatus()
+        {
+            return NagiosState.GetNagiosStatus();
+        }
+
+        public int GetGlobalExitCode()
+        {
+            return NagiosState.GetNagiosExitCode();
         }
     }
 }

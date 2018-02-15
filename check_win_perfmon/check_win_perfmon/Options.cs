@@ -7,7 +7,7 @@ namespace check_win_perfmon
     /// </summary>
     internal class Options
     {
-        [Option('f', "xmlFile", DefaultValue = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
+        [Option('f', "xmlFile", DefaultValue = "PerfMonNetwork.xml", HelpText = "XML file with performance counters to check.")]
         public string XmlFile { get; set; }
 
         [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from perfmon.")]
@@ -24,8 +24,8 @@ namespace check_win_perfmon
         {
             var help = new CommandLine.Text.HelpText
             {
-                Heading = new CommandLine.Text.HeadingInfo(programName: "Check Win Perfmon", version: "1.0\n"),
-                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2017),
+                Heading = new CommandLine.Text.HeadingInfo(programName: "Check Win Perfmon", version: "1.4\n"),
+                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2018),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };

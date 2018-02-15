@@ -1,6 +1,6 @@
 ﻿namespace check_win_perfmon
 {
-    public enum StatusEnum
+    public enum NagiosStatusEnum
     {
         Ok = 0,
         Warning = 1,

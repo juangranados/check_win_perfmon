@@ -87,8 +87,8 @@
     <Compile Include="PerfCounterList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Status.cs" />
-    <Compile Include="StatusEnum.cs" />
+    <Compile Include="NagiosStatus.cs" />
+    <Compile Include="NagiosStatusEnum.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

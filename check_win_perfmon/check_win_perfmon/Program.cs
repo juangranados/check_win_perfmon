@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+
 namespace check_win_perfmon
 {
     /// <summary>
@@ -9,7 +10,8 @@ namespace check_win_perfmon
     /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
     /// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
     /// </summary>
-    internal class Program
+
+    internal static class Program
     {
         private static void Main(string[] args)
         {
@@ -22,37 +24,36 @@ namespace check_win_perfmon
             System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
             //Initializing arguments
             var options = new Options();
+            //Parsing arguments
             CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
-            //Output message
-            string outputMessage;
             //List of performance monitors class
             PerfCounterList perfCounterList = null;
+            //Load XML with performance counters and calculate result
             try
             {
-                perfCounterList = new PerfCounterList(options.XmlFile, options.Verbose, options.MaxSamples, options.TimeSamples);
-                perfCounterList.Calculate();
+                perfCounterList = new PerfCounterList(options.XmlFile, options.Verbose);
+                perfCounterList.Calculate(options.MaxSamples, options.TimeSamples);
+                perfCounterList.Dispose();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Unknown: " + e.Message);
                 Environment.Exit(3);
             }
             
             //No errors in PerfCounter, all counters are between ranges
-            if (perfCounterList.GetStatus() == "Ok")
+            if (perfCounterList.GetGlobalExitCode() == 0)
             {
-                outputMessage = $"Ok - All performance counters between range{perfCounterList.PerfOutput}";
+                Console.WriteLine($"{perfCounterList.GetGlobalStatus()} - All performance counters between range {perfCounterList.GlobalPerfOutput}");
             }
             //Some counters has values out of tresholds
             else
             {
                 //Generate output with errors and performance data
-                outputMessage = $"{perfCounterList.GetStatus()} - {perfCounterList.Output + perfCounterList.PerfOutput}";   
+                Console.WriteLine($"{perfCounterList.GetGlobalStatus()} - {perfCounterList.GlobalOutput} {perfCounterList.GlobalPerfOutput}");   
             }
-            //Print result
-            Console.WriteLine(outputMessage);
             //Exit code for monitoring software
-            Environment.Exit(perfCounterList.GetExitCode());
+            Environment.Exit(perfCounterList.GetGlobalExitCode());
         }
     }
 }
