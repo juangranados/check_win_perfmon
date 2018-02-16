@@ -85,9 +85,17 @@ namespace check_win_perfmon
                             case "Network Interface":
                             case "Network Adapter":
                                 instanceName = NormalizeNetworkInterface(Utils.GetNetworkInterface().Description);
+                                if (instanceName == null)
+                                {
+                                    throw new ArgumentException($"Error detecting network interface on counter {counterName}.");
+                                }
                                 break;
                             case "PhysicalDisk":
                                 instanceName = Utils.GetDiskName();
+                                if (instanceName == "_total")
+                                {
+                                    throw new ArgumentException($"Error detecting physical disk 0 on counter {counterName}.");
+                                }
                                 break;
                             default:
                                 throw new ArgumentException(
@@ -139,13 +147,22 @@ namespace check_win_perfmon
                     {
                         case "Memory":
                         case "SQLServer:Memory Manager":
+                        case "MSSQL$MICROSOFT##WID:Memory Manager":
                             WriteVerbose($"Getting system memory");
                             _max = Utils.GetTotalMemory(units);
+                            if (_max <= 0)
+                            {
+                                throw new ArgumentException($"Error detecting system memory in counter {counterName}.", max);
+                            }
                             break;
                         case "Network Interface":
                         case "Network Adapter":
                             WriteVerbose($"Getting interface {instanceName} speed");
                             _max = Utils.GetNetworkInterfaceSpeed(DeNormalizeNetworkInterface(instanceName));
+                            if (_max <= 0)
+                            {
+                                throw new ArgumentException($"Error detecting interface {DeNormalizeNetworkInterface(instanceName)} speed  in counter {counterName}.", max);
+                            }
                             break;
                         default:
                             throw new ArgumentException($"Parameter auto not supported for max in counter {counterName}.",max);

@@ -19,15 +19,22 @@ namespace check_win_perfmon
         {
             LoadXml(xmlFilePath, verbose);
         }
-
+        /// <summary>
+        /// Generate List of PerfCounter based on XML file.
+        /// </summary>
+        /// <param name="xmlFilePath">XML file path</param>
+        /// <param name="verbose">PerfCounter write debuggin messages on console</param>
         private void LoadXml(string xmlFilePath, bool verbose = false)
         {
+            //Dispose PerformanceCounter List if not empty
             if (_perfCounters != null)
             {
                 Dispose();
             }
 
+            //Create new PerformanceCounter List
             _perfCounters = new List<PerfCounter>();
+            //Load XML file
             var doc = new XmlDocument();
             doc.Load(xmlFilePath);
             var root = doc.DocumentElement;
@@ -64,6 +71,9 @@ namespace check_win_perfmon
                 throw new NullReferenceException("Error loading xml file.");
             }
         }
+        /// <summary>
+        /// Dispose al PerformanceCounter from List
+        /// </summary>
         public void Dispose()
         {
             foreach (var perfCounter in _perfCounters)
@@ -71,7 +81,11 @@ namespace check_win_perfmon
                 perfCounter.Dispose();
             }
         }
-
+        /// <summary>
+        /// Calculate all PerformanceCounter status and values based on tresholds given in XML file
+        /// </summary>
+        /// <param name="samples">Samples to take</param>
+        /// <param name="timeBetweenSamples">Pause between samples</param>
         public void Calculate(int samples,int timeBetweenSamples)
         {
             //Initialize counters
@@ -89,15 +103,15 @@ namespace check_win_perfmon
                     {
                         //Calculate performance counter status and values
                         perfCounter.Calculate();
-                        //Get performance output
+                        //Add performance output to global performance.
                         GlobalPerfOutput = GlobalPerfOutput + perfCounter.PerfString + " ";
                         //Check if PerfCounter is out of tresholds
                         if (perfCounter.ResultString != null)
                         {
-                            //Get the error
+                            //Get the error to global errors.
                             GlobalOutput = GlobalOutput + perfCounter.ResultString + " ";
                         }
-                        //Set global status of counters
+                        //Set global status of counter List.
                         SetGlobalStatus(perfCounter.CounterStatus);
                     }
                 }
@@ -107,11 +121,14 @@ namespace check_win_perfmon
                     System.Threading.Thread.Sleep(timeBetweenSamples);
                 }
             }
-            //Trim spaces at the end
+            //Trim spaces at the end of globals.
             GlobalOutput = GlobalOutput?.TrimEnd();
             GlobalPerfOutput = GlobalPerfOutput.TrimEnd();
         }
-
+        /// <summary>
+        /// Initialize all counters.
+        /// </summary>
+        /// <param name="timeBetweenSamples"></param>
         private void Initialize(int timeBetweenSamples)
         {
             foreach (var perfCounter in _perfCounters)
@@ -120,7 +137,10 @@ namespace check_win_perfmon
             }
             System.Threading.Thread.Sleep(timeBetweenSamples);
         }
-
+        /// <summary>
+        /// Change global status of counter List
+        /// </summary>
+        /// <param name="nagiosStatus">Status to change</param>
         private void SetGlobalStatus(NagiosStatus nagiosStatus)
         {
             if (nagiosStatus.GetNagiosExitCode() == 1)
@@ -132,12 +152,18 @@ namespace check_win_perfmon
                 NagiosState.SetCritical();
             }
         }
-
+        /// <summary>
+        /// Return global status
+        /// </summary>
+        /// <returns></returns>
         public string GetGlobalStatus()
         {
             return NagiosState.GetNagiosStatus();
         }
-
+        /// <summary>
+        /// Return global exit code
+        /// </summary>
+        /// <returns></returns>
         public int GetGlobalExitCode()
         {
             return NagiosState.GetNagiosExitCode();

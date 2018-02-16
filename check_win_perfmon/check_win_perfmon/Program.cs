@@ -31,12 +31,16 @@ namespace check_win_perfmon
             //Load XML with performance counters and calculate result
             try
             {
+                //Load XML file
                 perfCounterList = new PerfCounterList(options.XmlFile, options.Verbose);
+                //Taking samples and calculate result of performance counters
                 perfCounterList.Calculate(options.MaxSamples, options.TimeSamples);
+                //Dispose performance counters
                 perfCounterList.Dispose();
             }
             catch (Exception e)
             {
+                //Return status and code unknown for monitoring software
                 Console.WriteLine("Unknown: " + e.Message);
                 Environment.Exit(3);
             }

@@ -26,9 +26,11 @@ namespace check_win_perfmon
                 var wniPart = (ManagementObject) o;
                 capacity += Convert.ToUInt64(wniPart.Properties["Capacity"].Value);
             }
-            
+
+            //Previous search failed. Trying alternative.
             if (capacity == 0)
             {
+                //using Project -> Add Reference -> Visual Basic
                 capacity = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory;
             }
 
@@ -81,6 +83,7 @@ namespace check_win_perfmon
                 let ipv6Properties = thisInterface.GetIPProperties().GetIPv6Properties()
                 where ipv6Properties != null && ipv6Properties.Index == interfaceindex
                 select thisInterface).SingleOrDefault();
+            
             return ipv6Interface;
         }
         /// <summary>
@@ -91,7 +94,7 @@ namespace check_win_perfmon
         {
             var category = new PerformanceCounterCategory("PhysicalDisk");
             var instancename = category.GetInstanceNames();
-            //Console.WriteLine(category.GetCounters());
+            
             foreach (var name in instancename)
             {
                 if (name.Contains("0 "))
@@ -101,6 +104,11 @@ namespace check_win_perfmon
             }
             return "_total";
         }
+        /// <summary>
+        /// Return interface speed
+        /// </summary>
+        /// <param name="name">name of interface</param>
+        /// <returns></returns>
         public static float GetNetworkInterfaceSpeed(string name)
         {
             var networkInterface = NetworkInterface.GetAllNetworkInterfaces().SingleOrDefault(x => x.Description == name);
