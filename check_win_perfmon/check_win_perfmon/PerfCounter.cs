@@ -134,15 +134,17 @@ namespace check_win_perfmon
             {
                 if (max == "auto")
                 {
-                    WriteVerbose($"Detecting max for: \\{categoryName}\\{counterName}\\{instanceName}");
+                    WriteVerbose($"Detecting max for: {categoryName}");
                     switch (categoryName)
                     {
                         case "Memory":
                         case "SQLServer:Memory Manager":
+                            WriteVerbose($"Getting system memory");
                             _max = Utils.GetTotalMemory(units);
                             break;
                         case "Network Interface":
                         case "Network Adapter":
+                            WriteVerbose($"Getting interface {instanceName} speed");
                             _max = Utils.GetNetworkInterfaceSpeed(DeNormalizeNetworkInterface(instanceName));
                             break;
                         default:

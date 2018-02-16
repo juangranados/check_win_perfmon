@@ -26,6 +26,11 @@ namespace check_win_perfmon
                 var wniPart = (ManagementObject) o;
                 capacity += Convert.ToUInt64(wniPart.Properties["Capacity"].Value);
             }
+            
+            if (capacity == 0)
+            {
+                capacity = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory;
+            }
 
             switch (units)
             {
