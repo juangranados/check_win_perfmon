@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -12,13 +13,13 @@ namespace check_win_perfmon
     public class PerfCounter
     {
         private PerformanceCounter _performanceCounter;
+        public NagiosStatus CounterStatus { get; } = new NagiosStatus();
         private readonly string _friendlyName;
         private readonly string _units;
         private readonly float _warning;
         private readonly float _critical;
         private float _min;
         private float _max;
-        public NagiosStatus CounterStatus { get; } = new NagiosStatus();
         private readonly bool _check;
         private int _samplesCount;
         private float _result;
@@ -26,11 +27,13 @@ namespace check_win_perfmon
         private bool _disposed;
         private static readonly string Format = "0." + new string('#', 324);
         private readonly bool _verbose;
+        private readonly Dictionary<char,char> _networkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' } };
 
-        /// <summary>
-        /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
-        /// </summary>
-        public string ResultString { get; private set; }
+
+    /// <summary>
+    /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
+    /// </summary>
+    public string ResultString { get; private set; }
 
         /// <summary>
         /// Get and set for perfstring, string that contains performance data in Icinga/Nagios format
@@ -81,11 +84,7 @@ namespace check_win_perfmon
                         {
                             case "Network Interface":
                             case "Network Adapter":
-                                var tempInstanceName = Utils.GetNetworkInterface().Description;
-                                tempInstanceName = tempInstanceName.Replace('#', '_');
-                                tempInstanceName = tempInstanceName.Replace('(', '[');
-                                tempInstanceName = tempInstanceName.Replace(')', ']');
-                                instanceName = tempInstanceName;
+                                instanceName = NormalizeNetworkInterface(Utils.GetNetworkInterface().Description);
                                 break;
                             case "PhysicalDisk":
                                 instanceName = Utils.GetDiskName();
@@ -144,7 +143,7 @@ namespace check_win_perfmon
                             break;
                         case "Network Interface":
                         case "Network Adapter":
-                            _max = Utils.GetNetworkInterfaceSpeed(instanceName);
+                            _max = Utils.GetNetworkInterfaceSpeed(DeNormalizeNetworkInterface(instanceName));
                             break;
                         default:
                             throw new ArgumentException($"Parameter auto not supported for max in counter {counterName}.",max);
@@ -295,7 +294,7 @@ namespace check_win_perfmon
                     //Calculate percent of result and round to zero floats
                     //Calculate percent of warning and critical and round to zero floats
                     //Add new percent to performance output
-                    PerfString = PerfString + $"'{_friendlyName}Percent'={Math.Floor(_result * 100 / _max)}%;{Math.Floor(_warning * 100 / _max)};{Math.Floor(_critical * 100 / _max)};0;100";
+                    PerfString = PerfString + $" '{_friendlyName}Percent'={Math.Floor(_result * 100 / _max)}%;{Math.Floor(_warning * 100 / _max)};{Math.Floor(_critical * 100 / _max)};0;100";
                 }
             }
         }
@@ -353,6 +352,16 @@ namespace check_win_perfmon
                 }
             }
         }
+
+        private string NormalizeNetworkInterface(string networkInterface)
+        {
+            return _networkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Key, s.Value));
+        }
+        private string DeNormalizeNetworkInterface(string networkInterface)
+        {
+            return _networkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Value, s.Key));
+        }
+
         private void WriteVerbose(string output)
         {
             if (_verbose)
