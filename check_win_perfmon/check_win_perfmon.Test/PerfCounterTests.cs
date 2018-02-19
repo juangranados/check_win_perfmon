@@ -95,5 +95,11 @@ namespace check_win_perfmon.Test
         {
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10%", "0", "none");
         }
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void PerfCounter_WarningIsAPercentAndMaxIsNone_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5%", "10", "0", "none");
+        }
     }
 }
