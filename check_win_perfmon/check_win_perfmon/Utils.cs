@@ -62,7 +62,7 @@ namespace check_win_perfmon
         /// Auto detect internet connected network interface
         /// </summary>
         /// <returns>Internet connected network interface</returns>
-        public static NetworkInterface GetNetworkInterface()
+        public static string GetNetworkInterface()
         {
             var ip = System.Net.IPAddress.Parse("8.8.8.8");
             GetBestInterface(BitConverter.ToUInt32(ip.GetAddressBytes(), 0), out var interfaceindex);
@@ -74,7 +74,7 @@ namespace check_win_perfmon
                 select thisInterface).SingleOrDefault();
             if (ipv4Interface != null)
             {
-                return ipv4Interface;
+                return ipv4Interface.Description;
             }
 
             // Search in all network interfaces that support IPv6.
@@ -83,8 +83,7 @@ namespace check_win_perfmon
                 let ipv6Properties = thisInterface.GetIPProperties().GetIPv6Properties()
                 where ipv6Properties != null && ipv6Properties.Index == interfaceindex
                 select thisInterface).SingleOrDefault();
-            
-            return ipv6Interface;
+            return ipv6Interface != null ? ipv6Interface.Description : "unknown";
         }
         /// <summary>
         /// Get instance name of disk 0
