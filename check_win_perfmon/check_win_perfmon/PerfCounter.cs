@@ -228,12 +228,19 @@ namespace check_win_perfmon
                 }
                 else
                 {
-                    throw new Exception($"Can not calculate % of max because is none or zero in counter {_friendlyName}.");
+                    throw new InvalidOperationException($"Can not calculate % of max because is none or zero in counter {_friendlyName}.");
                 }
             }
             else
             {
-                field = float.Parse(value, CultureInfo.InvariantCulture.NumberFormat);
+                try
+                {
+                    field = float.Parse(value, CultureInfo.InvariantCulture.NumberFormat);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"Error parsing warning or critical in counter {_friendlyName}. Please, check it is a number.", nameof(field));
+                }
             }
         }
 
@@ -245,7 +252,7 @@ namespace check_win_perfmon
             //Some counters returns zero on first value because they need two values in order to be calculated.
             if (!_initialized)
             {
-                throw new Exception($"Counter {_friendlyName} has not been inicialized.");
+                throw new InvalidOperationException($"Counter {_friendlyName} has not been inicialized.");
             }
 
             var nextValue = _performanceCounter.NextValue();
