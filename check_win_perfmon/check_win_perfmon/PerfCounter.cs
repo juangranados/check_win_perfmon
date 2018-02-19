@@ -29,12 +29,12 @@ namespace check_win_perfmon
         private static readonly string FormatFloat = "0." + new string('#', 324);
         private readonly bool _verbose;
         private readonly Dictionary<char,char> _networkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' }, { '\\', '-' }, { '/', '-' } };
+        private readonly string _interfacename;
 
-
-    /// <summary>
-    /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
-    /// </summary>
-    public string ResultString { get; private set; }
+        /// <summary>
+        /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
+        /// </summary>
+        public string ResultString { get; private set; }
 
         /// <summary>
         /// Get and set for perfstring, string that contains performance data in Icinga/Nagios format
@@ -84,7 +84,8 @@ namespace check_win_perfmon
                         {
                             case "Network Interface":
                             case "Network Adapter":
-                                instanceName = NormalizeNetworkInterface(Utils.GetNetworkInterface());
+                                _interfacename = Utils.GetNetworkInterface();
+                                instanceName = NormalizeNetworkInterface(_interfacename);
                                 if (instanceName == "unknown")
                                 {
                                     throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", instanceName);
@@ -160,18 +161,18 @@ namespace check_win_perfmon
                             break;
                         case "Network Interface":
                         case "Network Adapter":
-                            WriteVerbose($"Getting interface {DeNormalizeNetworkInterface(instanceName)} speed");
-                            _max = Utils.GetNetworkInterfaceSpeed(DeNormalizeNetworkInterface(instanceName));
+                            WriteVerbose($"Getting interface {_interfacename} speed");
+                            _max = Utils.GetNetworkInterfaceSpeed(_interfacename);
                             if (_max <= 0)
                             {
-                                throw new ArgumentException($"Error detecting interface {DeNormalizeNetworkInterface(instanceName)} speed in counter \\{categoryName}\\{counterName}.", max);
+                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter \\{categoryName}\\{counterName}.", max);
                             }
                             break;
                         default:
                             throw new ArgumentException($"Parameter auto not supported for max in counter {counterName}.",max);
                     }
 
-                    WriteVerbose($"Detected max of: {_max} for: \\{categoryName}\\{counterName}");
+                    WriteVerbose($"Detected max of: {_max.ToString(FormatFloat)} for: \\{categoryName}\\{counterName}");
                 }
                 else
                 {
@@ -388,10 +389,6 @@ namespace check_win_perfmon
         private string NormalizeNetworkInterface(string networkInterface)
         {
             return _networkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Key, s.Value));
-        }
-        private string DeNormalizeNetworkInterface(string networkInterface)
-        {
-            return _networkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Value, s.Key));
         }
 
         private void WriteVerbose(string output)
