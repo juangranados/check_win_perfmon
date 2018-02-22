@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
@@ -7,8 +8,9 @@ using System.Runtime.InteropServices;
 
 namespace check_win_perfmon
 {
-    internal class Utils
+    public class Utils
     {
+        private static readonly Dictionary<char, char> NetworkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' }, { '\\', '-' }, { '/', '-' } };
         /// <summary>
         /// Get total memory of computer
         /// </summary>
@@ -116,6 +118,10 @@ namespace check_win_perfmon
                 return (float)networkInterface.Speed/8;
             }
             return 0;
+        }
+        public static string NormalizeNetworkInterface(string networkInterface)
+        {
+            return NetworkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Key, s.Value));
         }
     }
 }

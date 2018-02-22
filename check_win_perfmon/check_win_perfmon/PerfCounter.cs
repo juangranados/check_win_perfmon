@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -28,7 +27,6 @@ namespace check_win_perfmon
         private bool _disposed;
         private static readonly string FormatFloat = "0." + new string('#', 324);
         private readonly bool _verbose;
-        private readonly Dictionary<char,char> _networkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' }, { '\\', '-' }, { '/', '-' } };
         private readonly string _interfacename;
 
         /// <summary>
@@ -40,6 +38,12 @@ namespace check_win_perfmon
         /// Get and set for perfstring, string that contains performance data in Icinga/Nagios format
         /// </summary>
         public string PerfString { get; private set; }
+
+        public float GetWarning(){ return _warning; }
+        public float GetCritical(){ return _critical; }
+        public float GetMax() { return _max; }
+        public float GetMin() { return _min; }
+        public float GetResult() { return _result; }
 
         /// <summary>
         /// Constructor od class PerfCounter
@@ -85,7 +89,7 @@ namespace check_win_perfmon
                             case "Network Interface":
                             case "Network Adapter":
                                 _interfacename = Utils.GetNetworkInterface();
-                                instanceName = NormalizeNetworkInterface(_interfacename);
+                                instanceName = Utils.NormalizeNetworkInterface(_interfacename);
                                 if (instanceName == "unknown")
                                 {
                                     throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", instanceName);
@@ -247,7 +251,7 @@ namespace check_win_perfmon
         /// <summary>
             /// Calculate value of a counter and generate result if last sample is reached
             /// </summary>
-        public void NextValue()
+        public float NextValue()
         {
             //Some counters returns zero on first value because they need two values in order to be calculated.
             if (!_initialized)
@@ -260,6 +264,8 @@ namespace check_win_perfmon
             _samplesCount = _samplesCount + 1;
 
             WriteVerbose($"Next value of performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}: {nextValue}");
+
+            return nextValue;
         }
         /// <summary>
         /// Initialize performance counter for new calculations
@@ -391,11 +397,6 @@ namespace check_win_perfmon
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
                 }
             }
-        }
-
-        private string NormalizeNetworkInterface(string networkInterface)
-        {
-            return _networkInterfaceReplacements.Aggregate(networkInterface, (result, s) => result.Replace(s.Key, s.Value));
         }
 
         private void WriteVerbose(string output)
