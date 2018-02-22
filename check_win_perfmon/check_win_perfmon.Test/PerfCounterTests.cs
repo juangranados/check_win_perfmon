@@ -4,7 +4,6 @@ using static check_win_perfmon.Utils;
 
 namespace check_win_perfmon.Test
 {
-    [TestClass]
     public class PerfCounterTests
     {
         //MethodName_Condition_Expectation

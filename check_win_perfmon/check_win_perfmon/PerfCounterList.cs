@@ -8,7 +8,7 @@ namespace check_win_perfmon
     /// Class to manage performance counter list, generate and calculate output in Icinga/Nagios format.
     /// </summary>
     // Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
-    internal class PerfCounterList
+    public class PerfCounterList
     {
         public string GlobalPerfOutput { get; private set; } = "| ";
         public string GlobalOutput { get; private set; }
@@ -19,6 +19,33 @@ namespace check_win_perfmon
         {
             LoadXml(xmlFilePath, verbose);
         }
+        public PerfCounterList(List<PerfCounter> perfCounters)
+        {
+            if (perfCounters.Count == 0)
+            {
+                throw new ArgumentException("Performance counters list cannot be empty", nameof(perfCounters));
+            }
+
+            if (_perfCounters != null)
+            {
+                Dispose();
+            }
+            _perfCounters = perfCounters;
+        }
+
+        public PerfCounterList()
+        {
+        }
+
+        public void AddPerformanceCounter(PerfCounter perfCounter)
+        {
+            if (_perfCounters == null)
+            {
+                _perfCounters = new List<PerfCounter>();
+            }
+            _perfCounters.Add(perfCounter);
+        }
+
         /// <summary>
         /// Generate List of PerfCounter based on XML file.
         /// </summary>
