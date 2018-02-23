@@ -4,11 +4,11 @@ using System.Xml;
 
 namespace check_win_perfmon
 {
+    /// <inheritdoc />
     /// <summary>
     /// Class to manage performance counter list, generate and calculate output in Icinga/Nagios format.
     /// </summary>
-    // Default values of xml based on http://mpwiki.viacode.com/default.aspx?g=posts&t=219816
-    public class PerfCounterList
+    public class PerfCounterList : IDisposable
     {
         public string GlobalPerfOutput { get; private set; } = "| ";
         public string GlobalOutput { get; private set; }
@@ -98,8 +98,9 @@ namespace check_win_perfmon
                 throw new NullReferenceException("Error loading xml file.");
             }
         }
+        /// <inheritdoc />
         /// <summary>
-        /// Dispose al PerformanceCounter from List
+        /// Dispose al Performance Counters from List
         /// </summary>
         public void Dispose()
         {
