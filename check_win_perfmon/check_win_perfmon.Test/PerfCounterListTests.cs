@@ -47,9 +47,9 @@ namespace check_win_perfmon.Test
         public void PerfCounterList_SimulateCheck_StatusCritical()
         {
             var perfCounter1 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "99%",
-                "10%", "0", "auto"); //Warning
+                "98%", "0", "auto"); //Critical
             var perfCounter2 = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "1",
-                "2", "0", "100"); //Critical
+                "90", "0", "100"); //Warning
             var perfCounter3 = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B",
                 "80%", "90%", "0", "auto"); //Ok
             var perfCounterList = new PerfCounterList();
