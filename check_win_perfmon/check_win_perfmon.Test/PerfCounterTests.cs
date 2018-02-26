@@ -4,6 +4,7 @@ using static check_win_perfmon.Utils;
 
 namespace check_win_perfmon.Test
 {
+    [TestClass]
     public class PerfCounterTests
     {
         //MethodName_Condition_Expectation
@@ -90,6 +91,30 @@ namespace check_win_perfmon.Test
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "test", "0", "100");
         }
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyWarningFormat_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">=5", "none", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyWarningEmpty_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">", "none", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyCriticalFormat_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", ">=5", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyCriticalEmpty_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "<", "0", "100");
+        }
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PerfCounter_CriticalIsAPercentAndMaxIsNone_ThrowsAnException()
         {
@@ -113,6 +138,20 @@ namespace check_win_perfmon.Test
         public void PerfCounter_InvalidCounter_ThrowsAnException()
         {
             var unused = new PerfCounter("ProcessorTest", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
+        }
+        [TestMethod]
+        public void PerfCounter_SimulateOk_StatusOk()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "98", "99", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
+        }
+        [TestMethod]
+        public void PerfCounter_NotCheckWarningAndCritical_StatusOk()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "none", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
         }
         [TestMethod]
         public void PerfCounter_SimulateWarning_StatusWarning()
@@ -139,6 +178,34 @@ namespace check_win_perfmon.Test
         public void PerfCounter_SimulateReverseCritical_StatusCritical()
         {
             var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "95%", "90%", "0", "auto");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
+        }
+        [TestMethod]
+        public void PerfCounter_SimulateOnlyGreaterWarning_StatusWarning()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">=5", "none", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
+        }
+        [TestMethod]
+        public void PerfCounter_SimulateOnlyGreaterCritical_StatusCritical()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", ">=5", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
+        }
+        [TestMethod]
+        public void PerfCounter_SimulateOnlyLessWarning_StatusWarning()
+        {
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "<=90%", "none", "0", "auto");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
+        }
+        [TestMethod]
+        public void PerfCounter_SimulateOnlyLessCritical_StatusCritical()
+        {
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "<=90%", "0", "auto");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }

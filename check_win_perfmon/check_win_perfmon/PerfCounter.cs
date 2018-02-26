@@ -20,7 +20,7 @@ namespace check_win_perfmon
         private readonly float _critical;
         private float _min;
         private float _max;
-        private readonly bool _check;
+        private readonly bool _check = true;
         private int _samplesCount;
         private float _result;
         private bool _initialized;
@@ -28,6 +28,8 @@ namespace check_win_perfmon
         private static readonly string FormatFloat = "0." + new string('#', 324);
         private readonly bool _verbose;
         private readonly string _interfacename;
+        private readonly char _checkOnlyCritical;
+        private readonly char _checkOnlyWarning;
 
         /// <summary>
         /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
@@ -200,11 +202,28 @@ namespace check_win_perfmon
             {
                 ParseIntoFloat(warning,out _warning);
                 ParseIntoFloat(critical, out _critical);
-
-                //Counter will be checked.
-                _check = true;
             }
-            //if warning or critical are "none" counter will not check 
+            else if (warning != "none")
+            {
+                _critical = 0;
+                if ((warning[0] != '>' && warning[0] != '<') || warning.Length < 3)
+                {
+                    throw new ArgumentException("If critical is none, only warning will check, you need to specify <= or >= before its value in order to calculate it.",warning);
+                }
+                _checkOnlyWarning = warning[0];
+                ParseIntoFloat(warning.Substring(2), out _warning);
+            }
+            else if (critical != "none")
+            {
+                _warning = 0;
+                if ((critical[0] != '>' && critical[0] != '<') || critical.Length < 2)
+                {
+                    throw new ArgumentException("If warning is none, only critical will check, you need to specify <= or >= before its value in order to calculate it.", critical);
+                }
+                _checkOnlyCritical = critical[0];
+                ParseIntoFloat(critical.Substring(2), out _critical);
+            }
+            //if warning and critical are "none" counter will not check 
             else
             {
                 _warning = 0;
@@ -212,7 +231,6 @@ namespace check_win_perfmon
                 _check = false;
             }
         }
-
         /// <summary>
         /// Parse warning and critical in to float and calculate them if are percent.
         /// </summary>
@@ -349,6 +367,57 @@ namespace check_win_perfmon
         /// </summary>
         private void CalculateStatus()
         {
+            switch (_checkOnlyWarning)
+            {
+                case '<':
+                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be greater than {_warning} to be ok");
+                    if (_result <= _warning)
+                    {
+                        RegisterStatusOnCounter("warning");
+                    }
+                    else
+                    {
+                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    }
+                    return;
+                case '>':
+                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be less than {_warning} to be ok");
+                    if (_result >= _warning)
+                    {
+                        RegisterStatusOnCounter("warning");
+                    }
+                    else
+                    {
+                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    }
+                    return;
+            }
+            switch (_checkOnlyCritical)
+            {
+                case '<':
+                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be greater than {_critical} to be ok");
+                    if (_result <= _critical)
+                    {
+                        RegisterStatusOnCounter("critical");
+                    }
+                    else
+                    {
+                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    }
+                    return;
+                case '>':
+                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be less than {_critical} to be ok");
+                    if (_result >= _critical)
+                    {
+                        RegisterStatusOnCounter("critical");
+                    }
+                    else
+                    {
+                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    }
+                    return;
+            }
+
             //Warning greater than critical->Counter has to be less than warning and critical to be ok.
             if (_warning < _critical)
             {
@@ -356,18 +425,12 @@ namespace check_win_perfmon
                 //Status critical
                 if (_result >= _critical)
                 {
-                    //Change global status to critical
-                    CounterStatus.SetCritical();
-                    //Generate error message
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} critical.";
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
+                    RegisterStatusOnCounter("critical");
                 }
                 //Status warning
                 else if (_result >= _warning)
                 {
-                    CounterStatus.SetWarning();
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} warning.";
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
+                    RegisterStatusOnCounter("warning");
                 }
                 else
                 {
@@ -381,22 +444,33 @@ namespace check_win_perfmon
                 //Status critical
                 if (_result <= _critical)
                 {
-                    CounterStatus.SetCritical();
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} critical.";
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_critical} -> status critical");
+                    RegisterStatusOnCounter("critical");
                 }
                 //Status warning
                 else if (_result <= _warning)
                 {
-                    CounterStatus.SetWarning();
-                    ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} warning.";
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} <= {_warning} -> status warning");
+                    RegisterStatusOnCounter("warning");
                 }
                 else
                 {
                     WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
                 }
             }
+        }
+
+        private void RegisterStatusOnCounter(string status)
+        {
+            if (status == "warning")
+            {
+                CounterStatus.SetWarning();
+                WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
+            }
+            else
+            {
+                CounterStatus.SetCritical();
+                WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
+            }
+            ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} {status}.";
         }
 
         private void WriteVerbose(string output)
