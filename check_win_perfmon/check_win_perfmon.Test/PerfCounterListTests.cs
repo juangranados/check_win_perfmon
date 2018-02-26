@@ -10,16 +10,11 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounterList_SimulateCheck_StatusOK()
         {
-            var perfCounter1 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "15%",
-                "10%", "0", "auto");
-            var perfCounter2 = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "85",
-                "95", "0", "100");
-            var perfCounter3 = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B",
-                "80%", "90%", "0", "auto");
             var perfCounterList = new PerfCounterList();
-            perfCounterList.AddPerformanceCounter(perfCounter1);
-            perfCounterList.AddPerformanceCounter(perfCounter2);
-            perfCounterList.AddPerformanceCounter(perfCounter3);
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "15%","10%", "0", "auto"));
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "85", "95", "0", "100"));
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B", "80%", "90%", "0", "auto"));
+            perfCounterList.AddPerformanceCounter(new PerfCounter("PhysicalDisk", "Current Disk Queue Length", "auto", "CurrentDiskQueueLength", "", ">=32", "none", "none", "none"));
             perfCounterList.Calculate(3, 1000);
             Assert.AreEqual(perfCounterList.GetGlobalExitCode(), 0);
             perfCounterList.Dispose();
@@ -28,16 +23,11 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounterList_SimulateCheck_StatusWarning()
         {
-            var perfCounter1 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "15%",
-                "10%", "0", "auto"); //Ok
-            var perfCounter2 = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "1",
-                "95", "0", "100"); //Warning
-            var perfCounter3 = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B",
-                "80%", "90%", "0", "auto"); //Ok
             var perfCounterList = new PerfCounterList();
-            perfCounterList.AddPerformanceCounter(perfCounter1);
-            perfCounterList.AddPerformanceCounter(perfCounter2);
-            perfCounterList.AddPerformanceCounter(perfCounter3);
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "15%", "10%", "0", "auto")); //Ok
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "1", "95", "0", "100")); //Warning
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B", "80%", "90%", "0", "auto")); //Ok
+            perfCounterList.AddPerformanceCounter(new PerfCounter("PhysicalDisk", "Current Disk Queue Length", "auto", "CurrentDiskQueueLength", "", "none", ">=40", "none", "none")); //Ok
             perfCounterList.Calculate(3, 1000);
             Assert.AreEqual(perfCounterList.GetGlobalExitCode(), 1);
             perfCounterList.Dispose();
@@ -46,16 +36,11 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounterList_SimulateCheck_StatusCritical()
         {
-            var perfCounter1 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "99%",
-                "98%", "0", "auto"); //Critical
-            var perfCounter2 = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "1",
-                "90", "0", "100"); //Warning
-            var perfCounter3 = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B",
-                "80%", "90%", "0", "auto"); //Ok
             var perfCounterList = new PerfCounterList();
-            perfCounterList.AddPerformanceCounter(perfCounter1);
-            perfCounterList.AddPerformanceCounter(perfCounter2);
-            perfCounterList.AddPerformanceCounter(perfCounter3);
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "99%", "98%", "0", "auto")); //Critical
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "1", "90", "0", "100")); //Warning
+            perfCounterList.AddPerformanceCounter(new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B", "80%", "90%", "0", "auto")); //Ok
+            perfCounterList.AddPerformanceCounter(new PerfCounter("PhysicalDisk", "% Idle Time", "auto", "IdleTime", "%", "<=100", "none", "0", "100")); // Warning
             perfCounterList.Calculate(3, 1000);
             Assert.AreEqual(perfCounterList.GetGlobalExitCode(), 2);
             perfCounterList.Dispose();

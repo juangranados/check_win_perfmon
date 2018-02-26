@@ -30,6 +30,7 @@ namespace check_win_perfmon
         private readonly string _interfacename;
         private readonly char _checkOnlyCritical;
         private readonly char _checkOnlyWarning;
+        private readonly string _performanceCounterString;
 
         /// <summary>
         /// Get and set for resultString, string that contains result of counter (Ok, warning or critical)
@@ -75,7 +76,7 @@ namespace check_win_perfmon
             //Min and max can not be the same
             if (min == max && min != "none")
             {
-                throw new Exception($"Min and max can not be the same on counter {counterName}");
+                throw new Exception($"Min and max can not has the same value on counter {counterName}");
             }
 
             try
@@ -88,6 +89,7 @@ namespace check_win_perfmon
                     {
                         switch (categoryName)
                         {
+                            //Autodetect physical interface.
                             case "Network Interface":
                             case "Network Adapter":
                                 _interfacename = Utils.GetNetworkInterface();
@@ -97,6 +99,7 @@ namespace check_win_perfmon
                                     throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", instanceName);
                                 }
                                 break;
+                            //Autodetect physical disk 0
                             case "PhysicalDisk":
                                 instanceName = Utils.GetDiskName();
                                 if (instanceName == "_total")
@@ -113,14 +116,18 @@ namespace check_win_perfmon
 
                     //Create performance counter
                     _performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName, true);
+                    _performanceCounterString =
+                        $"\\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}";
                 }
                 //Performance counter without instance
                 else
                 {
                     _performanceCounter = new PerformanceCounter(categoryName, counterName, true);
+                    _performanceCounterString =
+                        $"\\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}";
                 }
 
-                WriteVerbose($"Created read only performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
+                WriteVerbose($"Created read only performance counter {_performanceCounterString}");
             }
             catch (Exception e)
             {
@@ -139,7 +146,7 @@ namespace check_win_perfmon
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Error parsing min in counter \\{categoryName}\\{counterName}. Please, check it is a number.", min);
+                    throw new ArgumentException($"Error parsing min in counter {_performanceCounterString}. Please, check it is a number.", min);
                 }
             }
             //No min specified
@@ -152,33 +159,37 @@ namespace check_win_perfmon
             {
                 if (max == "auto")
                 {
-                    WriteVerbose($"Detecting max for: \\{categoryName}\\{counterName}");
+                    WriteVerbose($"Detecting max for: {_performanceCounterString}");
                     switch (categoryName)
                     {
                         case "Memory":
                         case "SQLServer:Memory Manager":
                         case "MSSQL$MICROSOFT##WID:Memory Manager":
-                            WriteVerbose($"Getting system memory");
+                            WriteVerbose("Getting system memory");
                             _max = Utils.GetTotalMemory(units);
                             if (_max <= 0)
                             {
-                                throw new ArgumentException($"Error detecting system memory in counter \\{categoryName}\\{counterName}.", max);
+                                throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", max);
                             }
                             break;
                         case "Network Interface":
                         case "Network Adapter":
+                            if (_interfacename == null)
+                            {
+                                _interfacename = instanceName;
+                            }
                             WriteVerbose($"Getting interface {_interfacename} speed");
                             _max = Utils.GetNetworkInterfaceSpeed(_interfacename);
                             if (_max <= 0)
                             {
-                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter \\{categoryName}\\{counterName}.", max);
+                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter {_performanceCounterString}.", max);
                             }
                             break;
                         default:
-                            throw new ArgumentException($"Parameter auto not supported for max in counter {counterName}.",max);
+                            throw new ArgumentException($"Parameter auto not supported for max in counter {_performanceCounterString}.",max);
                     }
 
-                    WriteVerbose($"Detected max of: {_max.ToString(FormatFloat)} for: \\{categoryName}\\{counterName}");
+                    WriteVerbose($"Detected max of: {_max.ToString(FormatFloat)} for counter: {_performanceCounterString}");
                 }
                 else
                 {
@@ -188,7 +199,7 @@ namespace check_win_perfmon
                     }
                     catch (Exception)
                     {
-                        throw new ArgumentException($"Error parsing max in counter {counterName}. Please, check it is a number.",max);
+                        throw new ArgumentException($"Error parsing max in counter {_performanceCounterString}. Please, check it is a number.",max);
                     }
                 }
             }
@@ -206,9 +217,10 @@ namespace check_win_perfmon
             else if (warning != "none")
             {
                 _critical = 0;
-                if ((warning[0] != '>' && warning[0] != '<') || warning.Length < 3)
+                var warningSubstring = warning.Substring(0, warning.Length > 1 ? 2 : warning.Length);
+                if (warning.Length < 3 && warningSubstring != ">=" && warningSubstring != "<=")
                 {
-                    throw new ArgumentException("If critical is none, only warning will check, you need to specify <= or >= before its value in order to calculate it.",warning);
+                    throw new ArgumentException($"If critical is none, only warning will be checked. You must specify <= or >= before its value in order to calculate it on counter {_performanceCounterString}.", warning);
                 }
                 _checkOnlyWarning = warning[0];
                 ParseIntoFloat(warning.Substring(2), out _warning);
@@ -216,9 +228,10 @@ namespace check_win_perfmon
             else if (critical != "none")
             {
                 _warning = 0;
-                if ((critical[0] != '>' && critical[0] != '<') || critical.Length < 2)
+                var criticalSubstring = critical.Substring(0, critical.Length > 1 ? 2 : critical.Length);
+                if (critical.Length < 3 && criticalSubstring != ">=" && criticalSubstring != "<=")
                 {
-                    throw new ArgumentException("If warning is none, only critical will check, you need to specify <= or >= before its value in order to calculate it.", critical);
+                    throw new ArgumentException($"If warning is none, only critical will be checked. You must specify <= or >= before its value in order to calculate it on counter {_performanceCounterString}.", critical);
                 }
                 _checkOnlyCritical = critical[0];
                 ParseIntoFloat(critical.Substring(2), out _critical);
@@ -244,13 +257,20 @@ namespace check_win_perfmon
                 //Calculate percent
                 if (_max > 0)
                 {
-                    var percent = float.Parse(value.Substring(0, value.IndexOf("%", StringComparison.Ordinal)),
+                    try
+                    {
+                        var percent = float.Parse(value.Substring(0, value.IndexOf("%", StringComparison.Ordinal)),
                         CultureInfo.InvariantCulture.NumberFormat);
-                    field = _max * percent / 100;
+                        field = _max * percent / 100;
+                    }
+                    catch (Exception)
+                    {
+                        throw new ArgumentException($"Error parsing warning or critical with value {value} in counter on counter {_performanceCounterString}. Please, check it is a number.");
+                    }
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Can not calculate % of max because is none or zero in counter {_friendlyName}.");
+                    throw new InvalidOperationException($"Can not calculate % of max because is none or zero in counter on counter {_performanceCounterString}.");
                 }
             }
             else
@@ -261,7 +281,7 @@ namespace check_win_perfmon
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Error parsing warning or critical in counter {_friendlyName}. Please, check it is a number.", nameof(field));
+                    throw new ArgumentException($"Error parsing warning or critical  with value {value} in counter on counter {_performanceCounterString}. Please, check it is a number.");
                 }
             }
         }
@@ -274,14 +294,14 @@ namespace check_win_perfmon
             //Some counters returns zero on first value because they need two values in order to be calculated.
             if (!_initialized)
             {
-                throw new InvalidOperationException($"Counter {_friendlyName} has not been inicialized.");
+                throw new InvalidOperationException($"Counter on counter {_performanceCounterString} has not been inicialized.");
             }
 
             var nextValue = _performanceCounter.NextValue();
             _result = _result + nextValue;
             _samplesCount = _samplesCount + 1;
 
-            WriteVerbose($"Next value of performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}: {nextValue}");
+            WriteVerbose($"Next value of performance counter on counter {_performanceCounterString}: {nextValue}");
 
             return nextValue;
         }
@@ -296,14 +316,14 @@ namespace check_win_perfmon
             _result = 0;
             CounterStatus.Initialize();
 
-            WriteVerbose($"Initialized performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
+            WriteVerbose($"Initialized performance counter on counter {_performanceCounterString}");
         }
         /// <summary>
         /// Calculate performance and status
         /// </summary>
         public void Calculate()
         {
-            WriteVerbose($"{_samplesCount} samples taken for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}. Calculating performance and status.");
+            WriteVerbose($"{_samplesCount} samples taken for performance counter on counter {_performanceCounterString}. Calculating performance and status.");
             //Calculate average of samples
             _result = _result / _samplesCount;
             CalculatePerformance();
@@ -367,110 +387,125 @@ namespace check_win_perfmon
         /// </summary>
         private void CalculateStatus()
         {
-            switch (_checkOnlyWarning)
+            if (_checkOnlyWarning != '\0')
             {
-                case '<':
-                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be greater than {_warning} to be ok");
-                    if (_result <= _warning)
-                    {
-                        RegisterStatusOnCounter("warning");
-                    }
-                    else
-                    {
-                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
-                    }
-                    return;
-                case '>':
-                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be less than {_warning} to be ok");
-                    if (_result >= _warning)
-                    {
-                        RegisterStatusOnCounter("warning");
-                    }
-                    else
-                    {
-                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
-                    }
-                    return;
+                switch (_checkOnlyWarning)
+                {
+                    case '<':
+                        WriteVerbose(
+                            $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_warning} to be ok");
+                        if (_result <= _warning)
+                        {
+                            RegisterStatusOnCounter(NagiosStatusEnum.Warning);
+                        }
+                        else
+                        {
+                            WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                        }
+
+                        return;
+                    case '>':
+                        WriteVerbose(
+                            $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_warning} to be ok");
+                        if (_result >= _warning)
+                        {
+                            RegisterStatusOnCounter(NagiosStatusEnum.Warning);
+                        }
+                        else
+                        {
+                            WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                        }
+
+                        return;
+                }
             }
-            switch (_checkOnlyCritical)
+
+            if (_checkOnlyCritical != '\0')
             {
-                case '<':
-                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be greater than {_critical} to be ok");
-                    if (_result <= _critical)
-                    {
-                        RegisterStatusOnCounter("critical");
-                    }
-                    else
-                    {
-                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
-                    }
-                    return;
-                case '>':
-                    WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be less than {_critical} to be ok");
-                    if (_result >= _critical)
-                    {
-                        RegisterStatusOnCounter("critical");
-                    }
-                    else
-                    {
-                        WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
-                    }
-                    return;
+                switch (_checkOnlyCritical)
+                {
+                    case '<':
+                        WriteVerbose(
+                            $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} to be ok");
+                        if (_result <= _critical)
+                        {
+                            RegisterStatusOnCounter(NagiosStatusEnum.Critical);
+                        }
+                        else
+                        {
+                            WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                        }
+
+                        return;
+                    case '>':
+                        WriteVerbose(
+                            $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_critical} to be ok");
+                        if (_result >= _critical)
+                        {
+                            RegisterStatusOnCounter(NagiosStatusEnum.Critical);
+                        }
+                        else
+                        {
+                            WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                        }
+
+                        return;
+                }
             }
 
             //Warning greater than critical->Counter has to be less than warning and critical to be ok.
             if (_warning < _critical)
             {
-                WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be less than {_critical} and {_warning} to be ok");
+                WriteVerbose($"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_critical} and {_warning} to be ok");
                 //Status critical
                 if (_result >= _critical)
                 {
-                    RegisterStatusOnCounter("critical");
+                    RegisterStatusOnCounter(NagiosStatusEnum.Critical);
                 }
                 //Status warning
                 else if (_result >= _warning)
                 {
-                    RegisterStatusOnCounter("warning");
+                    RegisterStatusOnCounter(NagiosStatusEnum.Warning);
                 }
                 else
                 {
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
                 }
             }
             //Warning less than critical->Counter has to be greater than warning and critical to be ok.
             else
             {
-                WriteVerbose($"Average result for performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} -> Must be greater than {_critical} and {_warning} to be ok");
+                WriteVerbose($"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} and {_warning} to be ok");
                 //Status critical
                 if (_result <= _critical)
                 {
-                    RegisterStatusOnCounter("critical");
+                    RegisterStatusOnCounter(NagiosStatusEnum.Critical);
                 }
                 //Status warning
                 else if (_result <= _warning)
                 {
-                    RegisterStatusOnCounter("warning");
+                    RegisterStatusOnCounter(NagiosStatusEnum.Warning);
                 }
                 else
                 {
-                    WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} -> status ok");
+                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
                 }
             }
         }
 
-        private void RegisterStatusOnCounter(string status)
+        private void RegisterStatusOnCounter(NagiosStatusEnum nagiosStatusEnum )
         {
-            if (status == "warning")
+            if (nagiosStatusEnum == NagiosStatusEnum.Warning)
             {
                 CounterStatus.SetWarning();
-                WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_warning} -> status warning");
+                WriteVerbose($"Performance counter on counter {_performanceCounterString} = {_result} >= {_warning} -> status warning");
             }
             else
             {
                 CounterStatus.SetCritical();
-                WriteVerbose($"Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName} = {_result} >= {_critical} -> status critical");
+                WriteVerbose($"Performance counter on counter {_performanceCounterString} = {_result} >= {_critical} -> status critical");
             }
-            ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} {status}.";
+            ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} {nagiosStatusEnum.ToString().ToLower()}.";
         }
 
         private void WriteVerbose(string output)
@@ -490,7 +525,7 @@ namespace check_win_perfmon
             {
                 if (disposing)
                 {
-                    WriteVerbose($"Disposing Performance counter \\{_performanceCounter.CategoryName}\\{_performanceCounter.CounterName}\\{_performanceCounter.InstanceName}");
+                    WriteVerbose($"Disposing Performance counter on counter {_performanceCounterString}");
                     _performanceCounter.Close();
                     _performanceCounter.Dispose();
                     _performanceCounter = null;

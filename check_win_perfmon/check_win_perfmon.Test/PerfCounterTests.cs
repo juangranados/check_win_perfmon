@@ -8,6 +8,8 @@ namespace check_win_perfmon.Test
     public class PerfCounterTests
     {
         //MethodName_Condition_Expectation
+
+        //Incorrect data input tests
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void PerfCounter_MaxIsNull_ThrowsAnException()
@@ -92,27 +94,51 @@ namespace check_win_perfmon.Test
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void PerfCounter_IncorrectOnlyWarningFormat_ThrowsAnException()
+        public void PerfCounter_IncorrectOnlyWarningFormat1_ThrowsAnException()
         {
-            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">=5", "none", "0", "100");
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">5", "none", "0", "100");
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void PerfCounter_IncorrectOnlyWarningEmpty_ThrowsAnException()
+        public void PerfCounter_IncorrectOnlyWarningFormat2_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "none", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyWarningEmpty1_ThrowsAnException()
         {
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">", "none", "0", "100");
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void PerfCounter_IncorrectOnlyCriticalFormat_ThrowsAnException()
+        public void PerfCounter_IncorrectOnlyWarningEmpty2_ThrowsAnException()
         {
-            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", ">=5", "0", "100");
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", ">=", "none", "0", "100");
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void PerfCounter_IncorrectOnlyCriticalEmpty_ThrowsAnException()
+        public void PerfCounter_IncorrectOnlyCriticalFormat1_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", ">5", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyCriticalFormat2_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "5", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyCriticalEmpty1_ThrowsAnException()
         {
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "<", "0", "100");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_IncorrectOnlyCriticalEmpty2_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "<=", "0", "100");
         }
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
@@ -127,17 +153,18 @@ namespace check_win_perfmon.Test
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5%", "10", "0", "none");
         }
         [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void PerfCounter_InvalidCounter_ThrowsAnException()
+        {
+            var unused = new PerfCounter("ProcessorTest", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
+        }
+        //PerfCounter inicialization check
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PerfCounter_NextValueWithoutInitializingCounter_ThrowsAnException()
         {
             var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
             perfCounter.NextValue();
-        }
-        [TestMethod]
-        [ExpectedException(typeof(Exception))]
-        public void PerfCounter_InvalidCounter_ThrowsAnException()
-        {
-            var unused = new PerfCounter("ProcessorTest", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
         }
         [TestMethod]
         public void PerfCounter_SimulateOk_StatusOk()

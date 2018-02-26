@@ -5,8 +5,17 @@
     /// </summary>
     public class NagiosStatus
     {
-        public NagiosStatusEnum NagiosStatusMessage { get; private set; } = NagiosStatusEnum.Ok;
+        public NagiosStatusEnum NagiosStatusMessage { get; private set; }
 
+        public NagiosStatus()
+        {
+            NagiosStatusMessage = NagiosStatusEnum.Ok;
+        }
+
+        public NagiosStatus(NagiosStatusEnum nagiosStatusEnum)
+        {
+            NagiosStatusMessage = nagiosStatusEnum;
+        }
         public void SetWarning()
         {
             if (NagiosStatusMessage == NagiosStatusEnum.Ok)
