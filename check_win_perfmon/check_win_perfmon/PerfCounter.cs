@@ -96,7 +96,7 @@ namespace check_win_perfmon
                                 instanceName = Utils.NormalizeNetworkInterface(_interfacename);
                                 if (instanceName == "unknown")
                                 {
-                                    throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", instanceName);
+                                    throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", nameof(instanceName));
                                 }
                                 break;
                             //Autodetect physical disk 0
@@ -104,12 +104,12 @@ namespace check_win_perfmon
                                 instanceName = Utils.GetDiskName();
                                 if (instanceName == "_total")
                                 {
-                                    throw new ArgumentException($"Error detecting physical disk 0 on \\{categoryName}\\{counterName}.", instanceName);
+                                    throw new ArgumentException($"Error detecting physical disk 0 on \\{categoryName}\\{counterName}.", nameof(instanceName));
                                 }
                                 break;
                             default:
                                 throw new ArgumentException(
-                                    $"Parameter auto not supported for \\{categoryName}\\{counterName} counter instance.", instanceName);
+                                    $"Parameter auto not supported for \\{categoryName}\\{counterName} counter instance.", nameof(instanceName));
                         }
                         WriteVerbose($"Detected instance {instanceName} for counter \\{categoryName}\\{counterName}");
                     }
@@ -146,7 +146,7 @@ namespace check_win_perfmon
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Error parsing min in counter {_performanceCounterString}. Please, check it is a number.", min);
+                    throw new ArgumentException($"Error parsing min in counter {_performanceCounterString}. Please, check it is a number.", nameof(min));
                 }
             }
             //No min specified
@@ -169,7 +169,7 @@ namespace check_win_perfmon
                             _max = Utils.GetTotalMemory(units);
                             if (_max <= 0)
                             {
-                                throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", max);
+                                throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", nameof(max));
                             }
                             break;
                         case "Network Interface":
@@ -182,11 +182,11 @@ namespace check_win_perfmon
                             _max = Utils.GetNetworkInterfaceSpeed(_interfacename);
                             if (_max <= 0)
                             {
-                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter {_performanceCounterString}.", max);
+                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter {_performanceCounterString}.", nameof(max));
                             }
                             break;
                         default:
-                            throw new ArgumentException($"Parameter auto not supported for max in counter {_performanceCounterString}.",max);
+                            throw new ArgumentException($"Parameter auto not supported for max in counter {_performanceCounterString}.", nameof(max));
                     }
 
                     WriteVerbose($"Detected max of: {_max.ToString(FormatFloat)} for counter: {_performanceCounterString}");
@@ -199,7 +199,7 @@ namespace check_win_perfmon
                     }
                     catch (Exception)
                     {
-                        throw new ArgumentException($"Error parsing max in counter {_performanceCounterString}. Please, check it is a number.",max);
+                        throw new ArgumentException($"Error parsing max in counter {_performanceCounterString}. Please, check it is a number.", nameof(max));
                     }
                 }
             }
@@ -218,9 +218,9 @@ namespace check_win_perfmon
             {
                 _critical = 0;
                 var warningSubstring = warning.Substring(0, warning.Length > 1 ? 2 : warning.Length);
-                if (warning.Length < 3 && warningSubstring != ">=" && warningSubstring != "<=")
+                if (warning.Length < 3 && warningSubstring != "lt" && warningSubstring != "gt")
                 {
-                    throw new ArgumentException($"If critical is none, only warning will be checked. You must specify <= or >= before its value in order to calculate it on counter {_performanceCounterString}.", warning);
+                    throw new ArgumentException($"If critical is none, only warning will be checked. You must specify lt or gt before its value in order to calculate it on counter {_performanceCounterString}.", nameof(warning));
                 }
                 _checkOnlyWarning = warning[0];
                 ParseIntoFloat(warning.Substring(2), out _warning);
@@ -229,9 +229,9 @@ namespace check_win_perfmon
             {
                 _warning = 0;
                 var criticalSubstring = critical.Substring(0, critical.Length > 1 ? 2 : critical.Length);
-                if (critical.Length < 3 && criticalSubstring != ">=" && criticalSubstring != "<=")
+                if (critical.Length < 3 && criticalSubstring != "lt" && criticalSubstring != "gt")
                 {
-                    throw new ArgumentException($"If warning is none, only critical will be checked. You must specify <= or >= before its value in order to calculate it on counter {_performanceCounterString}.", critical);
+                    throw new ArgumentException($"If warning is none, only critical will be checked. You must specify lg or gt before its value in order to calculate it on counter {_performanceCounterString}.", nameof(critical));
                 }
                 _checkOnlyCritical = critical[0];
                 ParseIntoFloat(critical.Substring(2), out _critical);
@@ -391,7 +391,7 @@ namespace check_win_perfmon
             {
                 switch (_checkOnlyWarning)
                 {
-                    case '<':
+                    case 'l':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_warning} to be ok");
                         if (_result <= _warning)
@@ -404,7 +404,7 @@ namespace check_win_perfmon
                         }
 
                         return;
-                    case '>':
+                    case 'g':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_warning} to be ok");
                         if (_result >= _warning)
@@ -424,7 +424,7 @@ namespace check_win_perfmon
             {
                 switch (_checkOnlyCritical)
                 {
-                    case '<':
+                    case 'l':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} to be ok");
                         if (_result <= _critical)
@@ -437,7 +437,7 @@ namespace check_win_perfmon
                         }
 
                         return;
-                    case '>':
+                    case 'g':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_critical} to be ok");
                         if (_result >= _critical)
