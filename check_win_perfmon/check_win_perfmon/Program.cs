@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace check_win_perfmon
 {
     /// <summary>
-    /// Load xml file with performance counters and their threshholds.
+    /// Load xml file with performance counters and their thresholds.
     /// Check performance counters aganist tresholds.
     /// Print performance info in Icinga/Nagios format
     /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
