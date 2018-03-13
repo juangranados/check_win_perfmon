@@ -6,60 +6,80 @@ namespace check_win_perfmon
 {
     /// <inheritdoc />
     /// <summary>
-    /// Class to manage performance counter list, generate and calculate output in Icinga/Nagios format.
+    /// Class to manage a performance counter list, generate and calculate output in Icinga/Nagios format.
     /// </summary>
     public class PerfCounterList : IDisposable
     {
+        // String to store performance output from all counters
         public string GlobalPerfOutput { get; private set; } = "| ";
+        // String to store output from all counters
         public string GlobalOutput { get; private set; }
+        // PerfCounter list
         private List<PerfCounter> _perfCounters;
         private NagiosStatus NagiosState { get; } = new NagiosStatus();
-
+        /// <summary>
+        /// Initialize PerfCounter list from a XML file
+        /// </summary>
+        /// <param name="xmlFilePath">XML file containing performance counters definitions</param>
+        /// <param name="verbose">PerfCounter print verbose output to console</param>
         public PerfCounterList(string xmlFilePath, bool verbose = false)
         {
             LoadXml(xmlFilePath, verbose);
         }
+        /// <summary>
+        /// Initialize PerfCounter list from a performance counter list
+        /// </summary>
+        /// <param name="perfCounters">PerfCounter list</param>
         public PerfCounterList(List<PerfCounter> perfCounters)
         {
+            // Dont allow empty PerfCounter list
             if (perfCounters.Count == 0)
             {
                 throw new ArgumentException("Performance counters list cannot be empty", nameof(perfCounters));
             }
-
+            // Dispose PerfCounter list if not empty
             if (_perfCounters != null)
             {
                 Dispose();
             }
+            // Initialize PerfCounter list
             _perfCounters = perfCounters;
         }
-
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public PerfCounterList()
         {
         }
-
+        /// <summary>
+        /// Add PerfCounter to PerfCounter list
+        /// </summary>
+        /// <param name="perfCounter">PerfCounter to add</param>
         public void AddPerformanceCounter(PerfCounter perfCounter)
         {
+            // Initialize PerfCounter list if null
             if (_perfCounters == null)
             {
                 _perfCounters = new List<PerfCounter>();
             }
+            // Add PerfCounter to list
             _perfCounters.Add(perfCounter);
         }
 
         /// <summary>
-        /// Generate List of PerfCounter based on XML file.
+        /// Initialize PerfCounter list from XML file.
         /// </summary>
         /// <param name="xmlFilePath">XML file path</param>
-        /// <param name="verbose">PerfCounter write debuggin messages on console</param>
+        /// <param name="verbose">PerfCounter write debugging messages on console</param>
         private void LoadXml(string xmlFilePath, bool verbose = false)
         {
-            //Dispose PerformanceCounter List if not empty
+            //Dispose PerfCounter list if not empty
             if (_perfCounters != null)
             {
                 Dispose();
             }
 
-            //Create new PerformanceCounter List
+            //Create new PerfCounter List
             _perfCounters = new List<PerfCounter>();
             //Load XML file
             var doc = new XmlDocument();
@@ -69,10 +89,9 @@ namespace check_win_perfmon
             {
                 var nodes = root.SelectNodes("perfcounter");
                 if (nodes != null)
+                    //Generate PerfCounter list with all perfcounters in XML file
                     foreach (XmlNode node in nodes)
                     {
-                        //Generate PerfCounter list with all perfcounters in XML file
-
                         _perfCounters.Add(
                             new PerfCounter(
                                 node.SelectSingleNode("category")?.InnerText,
@@ -110,9 +129,9 @@ namespace check_win_perfmon
             }
         }
         /// <summary>
-        /// Calculate all PerformanceCounter status and values based on tresholds given in XML file
+        /// Calculate status and values of PerfCounter list based on each PerfCounter tresholds 
         /// </summary>
-        /// <param name="samples">Samples to take</param>
+        /// <param name="samples">Samples to take from each PerfCounter</param>
         /// <param name="timeBetweenSamples">Pause between samples</param>
         public void Calculate(int samples,int timeBetweenSamples)
         {
@@ -156,7 +175,7 @@ namespace check_win_perfmon
         /// <summary>
         /// Initialize all counters.
         /// </summary>
-        /// <param name="timeBetweenSamples"></param>
+        /// <param name="timeBetweenSamples">Pause after initialization</param>
         private void Initialize(int timeBetweenSamples)
         {
             foreach (var perfCounter in _perfCounters)
@@ -171,6 +190,11 @@ namespace check_win_perfmon
         /// <param name="nagiosStatus">Status to change</param>
         private void SetGlobalStatus(NagiosStatus nagiosStatus)
         {
+            if (nagiosStatus.GetNagiosExitCode() == 0)
+            {
+                return;
+            }
+
             if (nagiosStatus.GetNagiosExitCode() == 1)
             {
                 NagiosState.SetWarning();
