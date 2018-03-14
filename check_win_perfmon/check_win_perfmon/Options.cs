@@ -10,7 +10,7 @@ namespace check_win_perfmon
         [Option('f', "xmlFile", DefaultValue = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
         public string XmlFile { get; set; }
 
-        [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from perfmon.")]
+        [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from performance counter.")]
         public int MaxSamples { get; set; }
 
         [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
@@ -30,7 +30,7 @@ namespace check_win_perfmon
                 AddDashesToOption = true
             };
             help.AddPreOptionsLine("GNU General Public License 3.0\n");
-            help.AddPreOptionsLine("Usage: check_win_perfmon.exe params:\n");
+            help.AddPreOptionsLine("Usage: check_win_perfmon.exe parameters:\n");
             help.AddOptions(this);
             return help;
         }

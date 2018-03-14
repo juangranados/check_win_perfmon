@@ -4,11 +4,11 @@ using System.Diagnostics;
 namespace check_win_perfmon
 {
     /// <summary>
-    /// Load xml file with performance counters and their thresholds.
-    /// Check performance counters aganist tresholds.
+    /// Load XML file with performance counters and their thresholds.
+    /// Check performance counters against thresholds.
     /// Print performance info in Icinga/Nagios format
-    /// Exit with ok, warning, critical, unknown code in Icinga/Nagios format
-    /// Using nuget: (Install-Package) Costura.Fody, CommandLineParser
+    /// Exit with OK, warning, critical, unknown code in Icinga/Nagios format
+    /// Using NuGet: (Install-Package) Costura.Fody, CommandLineParser
     /// </summary>
 
     internal static class Program
@@ -19,7 +19,7 @@ namespace check_win_perfmon
             {
                 //Set lower priority for the process
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
-                //Use only first procesor
+                //Use only first processor
                 Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)1;
                 //Change culture to en-US in order to use . as decimal separator
                 System.Threading.Thread.CurrentThread.CurrentCulture =
@@ -40,7 +40,7 @@ namespace check_win_perfmon
                         Console.WriteLine(
                             $"{perfCounterList.GetGlobalStatus()} - All performance counters between range {perfCounterList.GlobalPerfOutput}");
                     }
-                    //Some counters has values out of tresholds
+                    //Some counters has values out of thresholds
                     else
                     {
                         //Generate output with errors and performance data

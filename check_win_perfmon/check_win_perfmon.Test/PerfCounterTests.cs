@@ -158,7 +158,9 @@ namespace check_win_perfmon.Test
         {
             var unused = new PerfCounter("ProcessorTest", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
         }
-        //PerfCounter inicialization check
+        /// <summary>
+        /// Test if exception is thrown if performance counter is not initialized
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PerfCounter_NextValueWithoutInitializingCounter_ThrowsAnException()
@@ -166,6 +168,10 @@ namespace check_win_perfmon.Test
             var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
             perfCounter.NextValue();
         }
+        /// <summary>
+        /// Simulate OK status.
+        /// Warning and critical are 99 an 99 for % Processor Time
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateOk_StatusOk()
         {
@@ -173,6 +179,35 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
         }
+        /// <summary>
+        /// Simulate OK status with only warning check
+        /// </summary>
+        [TestMethod]
+        public void PerfCounter_SimulateOkWithOnlyWarningCheck_StatusOk()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "gt90", "none", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
+            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "lt10%", "none", "0", "auto");
+            CalculatePerfCounter(perfCounter2);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
+        }
+        /// <summary>
+        /// Simulate OK status with only critical check
+        /// </summary>
+        [TestMethod]
+        public void PerfCounter_SimulateOkWithOnlyCriticalCheck_StatusOk()
+        {
+            var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "gt90", "0", "100");
+            CalculatePerfCounter(perfCounter);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
+            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "lt10%", "0", "auto");
+            CalculatePerfCounter(perfCounter2);
+            Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
+        }
+        /// <summary>
+        /// Simulate OK status if there aren't warning and critical
+        /// </summary>
         [TestMethod]
         public void PerfCounter_NotCheckWarningAndCritical_StatusOk()
         {
@@ -180,6 +215,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
         }
+        /// <summary>
+        /// Simulate warning status. performance counter value has to be lower than warning.
+        /// Warning is 1 for % Processor Time
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateWarning_StatusWarning()
         {
@@ -187,6 +226,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
+        /// <summary>
+        /// Simulate critical status.
+        /// Warning is 2 for % Processor Time
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateCritical_StatusCritical()
         {
@@ -194,6 +237,12 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
+        /// <summary>
+        /// Simulate reverse warning status, performance counter value has to be greater than warning.
+        /// Warning is 95% for Available MBytes.
+        /// Check also % interpretation is correct because max is specified and warning is a percent with MB value.
+        /// Check also memory auto detection in max parameter.
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateReverseWarning_StatusWarning()
         {
@@ -201,6 +250,12 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
+        /// <summary>
+        /// Simulate reverse critical status, performance counter value has to be greater than critical.
+        /// Critical is 90% for Available MBytes.
+        /// Check also % interpretation is correct because max is specified and critical is a percent with MB value.
+        /// Check also memory auto detection in max parameter.
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateReverseCritical_StatusCritical()
         {
@@ -208,6 +263,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
+        /// <summary>
+        /// Simulate only greater warning check.
+        /// Warning is gt5 for % Processor Time, status has to be warning
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateOnlyGreaterWarning_StatusWarning()
         {
@@ -215,6 +274,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
+        /// <summary>
+        /// Simulate only greater critical check.
+        /// Critical is gt5 for % Processor Time, status has to be critical
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateOnlyGreaterCritical_StatusCritical()
         {
@@ -222,6 +285,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
+        /// <summary>
+        /// Simulate only less warning check.
+        /// Warning is lt90 for Available MBytes, status has to be warning
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateOnlyLessWarning_StatusWarning()
         {
@@ -229,6 +296,10 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
+        /// <summary>
+        /// Simulate only less critical check.
+        /// Critical is lt90 for Available MBytes, status has to be critical
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SimulateOnlyLessCritical_StatusCritical()
         {
@@ -236,6 +307,9 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
+        /// <summary>
+        /// Test network interface speed auto detection
+        /// </summary>
         [TestMethod]
         public void PerfCounter_InterfaceSpeedAutodetection_InterfaceSpeedAsMax()
         {
@@ -243,6 +317,9 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.GetMax(), GetNetworkInterfaceSpeed(GetNetworkInterface()));
         }
+        /// <summary>
+        /// Test system memory auto detection
+        /// </summary>
         [TestMethod]
         public void PerfCounter_SystemMemoryAutodetection_SystemMemoryAsMax()
         {
@@ -250,6 +327,9 @@ namespace check_win_perfmon.Test
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.GetMax(), GetTotalMemory("MB"));
         }
+        /// <summary>
+        /// Check if warning and critical are correctly calculated when both has percent value
+        /// </summary>
         [TestMethod]
         public void PerfCounter_WarningAndCriticalPercentCalculation_WarningAndCriticalPercent()
         {
@@ -265,6 +345,9 @@ namespace check_win_perfmon.Test
             Assert.AreEqual(perfCounter.GetWarning(), interfaceSpeed * 80 / 100);
             Assert.AreEqual(perfCounter.GetCritical(), interfaceSpeed * 90 / 100);
         }
+        /// <summary>
+        /// Check if average result calculation if correct
+        /// </summary>
         [TestMethod]
         public void PerfCounter_CalculateAverageResult_AverageResult()
         {
@@ -280,6 +363,10 @@ namespace check_win_perfmon.Test
             perfCounter.Calculate();
             Assert.AreEqual(perfCounter.GetResult(), result / 3);
         }
+        /// <summary>
+        /// Simulate performance counter calculation using 3 samples
+        /// </summary>
+        /// <param name="perfCounter"></param>
         private static void CalculatePerfCounter(PerfCounter perfCounter)
         {
             perfCounter.Initialize();

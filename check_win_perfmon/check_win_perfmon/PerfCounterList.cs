@@ -32,7 +32,7 @@ namespace check_win_perfmon
         /// <param name="perfCounters">PerfCounter list</param>
         public PerfCounterList(List<PerfCounter> perfCounters)
         {
-            // Dont allow empty PerfCounter list
+            // Don't allow empty PerfCounter list
             if (perfCounters.Count == 0)
             {
                 throw new ArgumentException("Performance counters list cannot be empty", nameof(perfCounters));
@@ -89,7 +89,7 @@ namespace check_win_perfmon
             {
                 var nodes = root.SelectNodes("perfcounter");
                 if (nodes != null)
-                    //Generate PerfCounter list with all perfcounters in XML file
+                    //Generate PerfCounter list with all performance counters in XML file
                     foreach (XmlNode node in nodes)
                     {
                         _perfCounters.Add(
@@ -109,17 +109,17 @@ namespace check_win_perfmon
                     }
                 else
                 {
-                    throw new NullReferenceException("Error loading xml file. Error selecting perfcounter nodes.");
+                    throw new NullReferenceException("Error loading XML file. Error selecting perfcounter nodes.");
                 }
             }
             else
             {
-                throw new NullReferenceException("Error loading xml file.");
+                throw new NullReferenceException("Error loading XML file.");
             }
         }
         /// <inheritdoc />
         /// <summary>
-        /// Dispose al Performance Counters from List
+        /// Dispose all Performance Counters from List
         /// </summary>
         public void Dispose()
         {
@@ -129,7 +129,7 @@ namespace check_win_perfmon
             }
         }
         /// <summary>
-        /// Calculate status and values of PerfCounter list based on each PerfCounter tresholds 
+        /// Calculate status and values of PerfCounter list based on each PerfCounter thresholds 
         /// </summary>
         /// <param name="samples">Samples to take from each PerfCounter</param>
         /// <param name="timeBetweenSamples">Pause between samples</param>
@@ -152,7 +152,7 @@ namespace check_win_perfmon
                         perfCounter.Calculate();
                         //Add performance output to global performance.
                         GlobalPerfOutput = GlobalPerfOutput + perfCounter.PerfString + " ";
-                        //Check if PerfCounter is out of tresholds
+                        //Check if PerfCounter is out of thresholds
                         if (perfCounter.ResultString != null)
                         {
                             //Get the error to global errors.

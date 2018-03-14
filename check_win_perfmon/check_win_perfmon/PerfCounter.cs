@@ -478,12 +478,12 @@ namespace check_win_perfmon
                 // Check warning against threshold
                 switch (_checkOnlyWarning)
                 {
-                    // Check status warning -> if performance counter value is less than _warning
+                    // Warning status means performance counter value is less or equal than warning threshold
                     case 'l':
                         // Write verbose current performance counter value has to be greater than _warning to be OK
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_warning} to be OK");
-                        // If performance counter value is less or equal than _warning -> Warning status of counter
+                        // If performance counter value is less or equal than _warning -> counter has a warning status
                         if (_result <= _warning)
                         {
                             // Change performance counter status to warning and write verbose
@@ -497,27 +497,34 @@ namespace check_win_perfmon
                         }
                         // Status checked, exiting
                         return;
+                    // Warning status means performance counter value is greater or equal than warning threshold
                     case 'g':
+                        // Write verbose current performance counter value has to be less than _warning to be OK
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_warning} to be OK");
+                        // If performance counter value is greater or equal than _warning -> counter has a warning status
                         if (_result >= _warning)
                         {
+                            // Change performance counter status to critical and write verbose
                             RegisterStatusOnCounter(NagiosStatusEnum.Warning);
                             WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status warning");
                         }
                         else
                         {
+                            // Write verbose counter status is OK
                             WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status OK");
                         }
-
+                        // Status checked, exiting
                         return;
                 }
             }
-
+            // If only warning has a value, checkOnlyCritical is not empty
             if (_checkOnlyCritical != '\0')
             {
+                // Check critical against threshold
                 switch (_checkOnlyCritical)
                 {
+                    // Critical status means performance counter value is less or equal than critical threshold
                     case 'l':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} to be OK");
@@ -532,6 +539,7 @@ namespace check_win_perfmon
                         }
 
                         return;
+                    // Critical status means performance counter value is greater or equal than critical threshold
                     case 'g':
                         WriteVerbose(
                             $"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_critical} to be OK");
@@ -548,62 +556,72 @@ namespace check_win_perfmon
                         return;
                 }
             }
-
-            //Warning greater than critical->Counter has to be less than warning and critical to be OK.
+            // Warning and critical has values.
+            // Warning greater than critical->Counter has to be less than warning and critical to be OK.
             if (_warning < _critical)
             {
                 WriteVerbose($"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be less than {_critical} and {_warning} to be OK");
-                //Status critical
+                // Status critical if performance counter value is greater than critical threshold
                 if (_result >= _critical)
                 {
                     RegisterStatusOnCounter(NagiosStatusEnum.Critical);
                 }
-                //Status warning
+                // Status warning if performance counter value is greater than warning threshold
                 else if (_result >= _warning)
                 {
                     RegisterStatusOnCounter(NagiosStatusEnum.Warning);
                 }
                 else
                 {
-                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status OK");
                 }
             }
-            //Warning less than critical->Counter has to be greater than warning and critical to be ok.
+            //Warning less than critical->Counter has to be greater than warning and critical to be OK.
             else
             {
-                WriteVerbose($"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} and {_warning} to be ok");
-                //Status critical
+                WriteVerbose($"Average result for performance counter on counter {_performanceCounterString} = {_result} -> Must be greater than {_critical} and {_warning} to be OK");
+                // Status critical if performance counter value is less than critical threshold
                 if (_result <= _critical)
                 {
                     RegisterStatusOnCounter(NagiosStatusEnum.Critical);
                 }
-                //Status warning
+                // Status warning if performance counter value is less than warning threshold
                 else if (_result <= _warning)
                 {
                     RegisterStatusOnCounter(NagiosStatusEnum.Warning);
                 }
                 else
                 {
-                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status ok");
+                    WriteVerbose($"Performance counter on counter {_performanceCounterString} -> status OK");
                 }
             }
         }
-
+        /// <summary>
+        /// Change performance counter status according to Nagios / Icinga format.
+        /// Saves error in ResultString
+        /// </summary>
+        /// <param name="nagiosStatusEnum"></param>
         private void RegisterStatusOnCounter(NagiosStatusEnum nagiosStatusEnum )
         {
+            // Set status warning
             if (nagiosStatusEnum == NagiosStatusEnum.Warning)
             {
                 CounterStatus.SetWarning();
                 WriteVerbose($"Performance counter on counter {_performanceCounterString} = {_result} >= {_warning} -> status warning");
             }
+            // Set status critical
             else
             {
                 CounterStatus.SetCritical();
                 WriteVerbose($"Performance counter on counter {_performanceCounterString} = {_result} >= {_critical} -> status critical");
             }
+            // Store result and message in ResultString
             ResultString = $"{_friendlyName} = {Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)} {nagiosStatusEnum.ToString().ToLower()}.";
         }
-
+        /// <summary>
+        /// Write to console if _verbose is true
+        /// </summary>
+        /// <param name="output">Message to output</param>
         private void WriteVerbose(string output)
         {
             if (_verbose)
@@ -612,7 +630,7 @@ namespace check_win_perfmon
             }
         }
         /// <summary>
-        /// Dispose method
+        /// Private dispose method
         /// </summary>
         /// <param name="disposing"> Is disposing</param>
         private void Dispose(bool disposing)
@@ -630,6 +648,9 @@ namespace check_win_perfmon
                 _disposed = true;
             }
         }
+        /// <summary>
+        /// Dispose performance counter
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
