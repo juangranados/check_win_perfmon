@@ -65,7 +65,7 @@ namespace check_win_perfmon.Test
             var unused = new PerfCounter(null, "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "100");
         }
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void PerfCounter_MixAndMaxAreEquals_ThrowsAnException()
         {
             var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "100", "100");
