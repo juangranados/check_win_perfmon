@@ -206,6 +206,7 @@ namespace check_win_perfmon
                         case "Memory":
                         case "SQLServer:Memory Manager":
                         case "MSSQL$MICROSOFT##WID:Memory Manager":
+                        case "Hyper-V Dynamic Memory Balancer":
                             // Write verbose auto detection for system memory
                             WriteVerbose("Getting system memory");
                             // Try to detect system installed memory
