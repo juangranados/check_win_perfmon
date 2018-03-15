@@ -143,18 +143,18 @@ Max and min must have different value.
 If you want to check only warning or critical threshold, it should have the format: lt<value> or gt<value>, and none for not checked one.
 For example, warning if counter is less or equal than 15:
 	
-	```
+```
 	<warning>lt15</warning>
 	<critical>none</critical>
-	```
-Critical if counter is greater or equal than 90%:
+```
+Critical if counter is greater or equal than 90% of max:
 
-	```
+```
 	<warning>none</warning>
 	<critical>gt90%</critical>
 	<min>0</min>
 	<max>20480</max>
-	```
+```
 
 System Load
 -----------
