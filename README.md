@@ -152,7 +152,7 @@ In the example above, program will check two counters. For each counter, we need
 * **min:** minimum value of performance counter. If you do not know the minimum value, it has to be: none.
 * **max:** maximum value of performance counter.  If you do not know the maximum value, it has to be: none. This value can be auto for Memory category and Network Interface/Adapter category, program will detect the amount of memory installed on system or network interface speed on bytes/s.
 
-If max and min are specified, program returns one more prrformance result for percent value.
+If max and min are specified, program returns one more performance result for calculated percent value.
 Max and min must have different value.
 
 If you want to check only warning or critical threshold, it should have the format: lt<value> or gt<value>, and none for not checked one.
