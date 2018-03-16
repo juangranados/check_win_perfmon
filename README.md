@@ -29,7 +29,11 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonPrinter.xml***: Performance Counters to check Microsoft Print Server.
 
-* ***PerfMonCB.xml***: Performance Counters to check Microsoft Connection Broker Server.
+* ***PerfMonCB.xml***: Performance Counters to check Microsoft Connection Broker Server and its WID.
+
+* ***PerfMonHyperV.xml***: Performance Counters to check Microsoft Hyper-V Server.
+
+* ***PerfMonWID.xml***: Performance Counters to check Microsoft Windows Internal Database of WSUS.
 
 Examples
 --------
@@ -121,6 +125,17 @@ XML file used must have the following format, for example:
 		<critical>512</critical>
 		<min>0</min>
 		<max>auto</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Hyper-V Virtual Machine Health Summary</category>
+		<name>Health Critical</name>
+		<instance>none</instance>
+		<friendlyname>VirtualMachineHealthCritical</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>gt1</critical>
+		<min>none</min>
+		<max>none</max>
 	</perfcounter>
 </perfcounters> 
 ```
