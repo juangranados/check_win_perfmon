@@ -10,7 +10,7 @@ namespace check_win_perfmon
 {
     public class Utils
     {
-        private static readonly Dictionary<char, char> NetworkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' }, { '\\', '-' }, { '/', '-' } };
+        private static readonly Dictionary<char, char> NetworkInterfaceReplacements = new Dictionary<char, char> { { '#', '_' }, { '(', '[' }, { ')', ']' }, { '\\', '_' }, { '/', '_' } };
         /// <summary>
         /// Get total memory of computer
         /// </summary>
@@ -61,7 +61,7 @@ namespace check_win_perfmon
 
         private static extern int GetBestInterface(uint destAddr, out uint bestIfIndex);
         /// <summary>
-        /// Auto detect internet connected network interface
+        /// Auto detect Internet connected network interface
         /// </summary>
         /// <returns>Internet connected network interface</returns>
         public static string GetNetworkInterface()
