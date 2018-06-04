@@ -7,7 +7,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
-[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.3/check_win_perfmon.zip) Check Win Perfmon v1.3. 
+[Download](https://github.com/juangranados/check_win_perfmon/releases/download/1.4/check_win_perfmon.zip) Check Win Perfmon v1.4. 
 
 Please read below prior use it! 
 
@@ -29,7 +29,11 @@ In downloaded zip package, there are several .xml files preconfigured:
 
 * ***PerfMonPrinter.xml***: Performance Counters to check Microsoft Print Server.
 
-* ***PerfMonCB.xml***: Performance Counters to check Microsoft Connection Broker Server.
+* ***PerfMonCB.xml***: Performance Counters to check Microsoft Connection Broker Server and its WID.
+
+* ***PerfMonHyperV.xml***: Performance Counters to check Microsoft Hyper-V Server.
+
+* ***PerfMonWID.xml***: Performance Counters to check Microsoft Windows Internal Database of WSUS.
 
 Examples
 --------
@@ -122,6 +126,17 @@ XML file used must have the following format, for example:
 		<min>0</min>
 		<max>auto</max>
 	</perfcounter>
+	<perfcounter>
+		<category>Hyper-V Virtual Machine Health Summary</category>
+		<name>Health Critical</name>
+		<instance>none</instance>
+		<friendlyname>VirtualMachineHealthCritical</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>gt1</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
 </perfcounters> 
 ```
 
@@ -130,15 +145,31 @@ In the example above, program will check two counters. For each counter, we need
 * **category:** Category of performance counter
 * **name:** Name of the performance counter.
 * **instance:** Instance of performance counter. Some performance counter does not have instance, in this case the value must be: none. This value can be auto for Network category, program will autodetect best interface to check. This value can be auto for Physical Disk category too, program will autodetect physical disk 0. 
-* **friendlyname:** name of performance counter which program returns in output.
-* **units:** units program returns in output.
+* **friendlyname:** name of performance counter which program returns in performance output.
+* **units:** units program returns in performance output.
 * **warning:** Warning threshold for performance counter.
 * **critical:** Critical threshold for performance counter.
 * **min:** minimum value of performance counter. If you do not know the minimum value, it has to be: none.
 * **max:** maximum value of performance counter.  If you do not know the maximum value, it has to be: none. This value can be auto for Memory category and Network Interface/Adapter category, program will detect the amount of memory installed on system or network interface speed on bytes/s.
 
-If max and min are specified, program returns one more result for percent value.
+If max and min are specified, program returns one more performance result for calculated percent value.
 Max and min must have different value.
+
+If you want to check only warning or critical threshold, it should have the format: lt<value> or gt<value>, and none for not checked one.
+For example, warning if counter is less or equal than 15:
+	
+```
+	<warning>lt15</warning>
+	<critical>none</critical>
+```
+Critical if counter is greater or equal than 90% of max:
+
+```
+	<warning>none</warning>
+	<critical>gt90%</critical>
+	<min>0</min>
+	<max>20480</max>
+```
 
 System Load
 -----------
