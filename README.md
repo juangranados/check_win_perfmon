@@ -139,6 +139,7 @@ XML file used must have the following format, for example:
 	</perfcounter>
 </perfcounters> 
 ```
+**Warning: Counter names must be in english.**
 
 In the example above, program will check two counters. For each counter, we need to set:
 
