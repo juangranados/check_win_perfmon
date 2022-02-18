@@ -116,7 +116,7 @@ function Invoke-Process {
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $exePath = "$env:ProgramFiles\ICINGA2\sbin\check_win_perfmon.exe"
-$url = 'https://github.com/juangranados/check_win_perfmon/releases/download/1.4/check_win_perfmon.exe'
+$url = 'https://github.com/juangranados/check_win_perfmon/releases/download/1.5/check_win_perfmon.exe'
 $md5 = 'EAE8ACEF4E0426D1B4539A1E5E26991700F39D639D78178576F88C2D341B8DFE'
 
 $ErrorActionPreference = "SilentlyContinue"
