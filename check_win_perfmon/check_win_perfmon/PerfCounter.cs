@@ -213,7 +213,7 @@ namespace check_win_perfmon
                             throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", nameof(max));
                         }
                     }
-                    else if (max == "autonetwork")
+                    else if (max == autoNetwork)
                     {
                         // If _interfacename is null, network adapter name has not been auto detected
                         if (_interfacename == null)
