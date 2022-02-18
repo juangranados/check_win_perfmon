@@ -3,7 +3,7 @@
 	<perfcounter>
 		<category>PhysicalDisk</category>
 		<name>Avg. Disk sec/Transfer</name>
-		<instance>auto</instance>
+		<instance>autodisk</instance>
 		<friendlyname>AvgDiskSecTransfer</friendlyname>
 		<units>s</units>
 		<warning>0.04</warning>
@@ -14,7 +14,7 @@
 	<perfcounter>
 		<category>PhysicalDisk</category>
 		<name>Current Disk Queue Length</name>
-		<instance>auto</instance>
+		<instance>autodisk</instance>
 		<friendlyname>CurrentDiskQueueLength</friendlyname>
 		<units></units>
 		<warning>32</warning>
@@ -25,7 +25,7 @@
 	<perfcounter>
 		<category>PhysicalDisk</category>
 		<name>Avg. Disk sec/Write</name>
-		<instance>auto</instance>
+		<instance>autodisk</instance>
 		<friendlyname>AvgDiskSecWrite</friendlyname>
 		<units>s</units>
 		<warning>0.04</warning>
@@ -36,7 +36,7 @@
 	<perfcounter>
 		<category>PhysicalDisk</category>
 		<name>Avg. Disk sec/Read</name>
-		<instance>auto</instance>
+		<instance>autodisk</instance>
 		<friendlyname>AvgDiskSecRead</friendlyname>
 		<units>s</units>
 		<warning>0.04</warning>
@@ -47,7 +47,7 @@
 	<perfcounter>
 		<category>PhysicalDisk</category>
 		<name>% Idle Time</name>
-		<instance>auto</instance>
+		<instance>autodisk</instance>
 		<friendlyname>IdleTime</friendlyname>
 		<units>%</units>
 		<warning>20</warning>
