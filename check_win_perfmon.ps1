@@ -117,7 +117,7 @@ function Invoke-Process {
 
 $exePath = "$env:ProgramFiles\ICINGA2\sbin\check_win_perfmon.exe"
 $url = 'https://github.com/juangranados/check_win_perfmon/releases/download/1.5/check_win_perfmon.exe'
-$md5 = 'EAE8ACEF4E0426D1B4539A1E5E26991700F39D639D78178576F88C2D341B8DFE'
+$hash = '6F45616E0212B56A2FE9ECFC41D5663DF2C2C6F9C5CD61CA9248960FB48C2ECB'
 
 $ErrorActionPreference = "SilentlyContinue"
 $path = $exePath.Substring(0, $file.LastIndexOf('\'))
@@ -128,7 +128,7 @@ if (-not (Test-Path $exePath)) {
     Invoke-WebRequest $url -OutFile $exePath
 }
 else {
-    if ((Get-FileHash $exePath).Hash -ne $md5) {
+    if ((Get-FileHash $exePath).Hash -ne $hash) {
         Invoke-WebRequest $url -OutFile $exePath
     }
 }
