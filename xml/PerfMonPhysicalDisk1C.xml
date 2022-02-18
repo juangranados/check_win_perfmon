@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>PhysicalDisk</category>
+		<name>Avg. Disk sec/Transfer</name>
+		<instance>1 C:</instance>
+		<friendlyname>AvgDiskSecTransfer</friendlyname>
+		<units>s</units>
+		<warning>0.04</warning>
+		<critical>0.05</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<category>PhysicalDisk</category>
+		<name>Current Disk Queue Length</name>
+		<instance>1 C:</instance>
+		<friendlyname>CurrentDiskQueueLength</friendlyname>
+		<units></units>
+		<warning>32</warning>
+		<critical>40</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<category>PhysicalDisk</category>
+		<name>Avg. Disk sec/Write</name>
+		<instance>1 C:</instance>
+		<friendlyname>AvgDiskSecWrite</friendlyname>
+		<units>s</units>
+		<warning>0.04</warning>
+		<critical>0.05</critical>
+		<min>0</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<category>PhysicalDisk</category>
+		<name>Avg. Disk sec/Read</name>
+		<instance>1 C:</instance>
+		<friendlyname>AvgDiskSecRead</friendlyname>
+		<units>s</units>
+		<warning>0.04</warning>
+		<critical>0.05</critical>
+		<min>0</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<category>PhysicalDisk</category>
+		<name>% Idle Time</name>
+		<instance>1 C:</instance>
+		<friendlyname>IdleTime</friendlyname>
+		<units>%</units>
+		<warning>20</warning>
+		<critical>15</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+</perfcounters> 

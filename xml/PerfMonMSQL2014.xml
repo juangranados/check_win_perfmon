@@ -1,0 +1,1022 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!-- References -->
+<!-- https://www.sqlshack.com/sql-server-memory-performance-metrics-part-1-memory-pagessec-memory-page-faultssec/ -->
+<!-- http://www.databasejournal.com/features/mssql/article.php/3932406/Top-10-SQL-Server-Counters-for-Monitoring-SQL-Server-Performance.htm -->
+<!-- http://www.itninja.com/blog/view/microsoft-sql-server-monitoring-plug-ins -->
+<!-- https://github.com/clinthuffman/Clue -->
+<perfcounters>
+<!-- Process Category -->
+	<perfcounter>
+		<!-- \Process % Processor Time / Process(sqlservr)\% Processor Time 
+
+		Description: % Processor Time is the percentage of elapsed time that all 
+		of process threads used the processor to execution instructions. An 
+		instruction is the basic unit of execution in a computer, a thread is 
+		the object that executes instructions, and a process is the object 
+		created when a program is run. Code executed to handle some hardware 
+		interrupts and trap conditions are included in this counter. This 
+		counter measures the percentage of total processor time spent (user mode 
+		and kernel mode) on SQL Server process threads. If this counter stays at 
+		80% for sustained periods of time, then you may also wish to investigate 
+		other Process (sqlservr) such as Private Bytes, Virtual Bytes, and 
+		Working Set to get a better understanding of how SQL Server allocates 
+		certain segments of memory. 
+
+		Threshold: 
+		Red: SQL Server is using more than 30% user mode CPU usage
+
+		Reference: 
+		Monitoring CPU Usage
+		http://msdn.microsoft.com/en-us/library/ms178072.aspx 
+		Ask the Performance Team http://blogs.technet.com/askperf/archive/2008/01/18/do-you-know-where-your-processor-spends-its-time.aspx 
+		Clint Huffman's Windows Troubleshooting in the Field Blog http://blogs.technet.com/clinth/archive/2009/10/28/the-case-of-the-2-million-context-switches.aspx -->
+		<category>Process</category>
+		<name>% Processor Time</name>
+		<instance>sqlservr</instance>
+		<friendlyname>SQLServerProcessorTime</friendlyname>
+		<units>%</units>
+		<warning>80%</warning>
+		<critical>90%</critical>
+		<min>0</min>
+		<max>800</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \Process % Privileged Time / Process(sqlservr)\% Privileged Time 
+
+		Description: % Privileged Time is the percentage of elapsed time that 
+		the process threads spent executing code in privileged mode. When a 
+		Windows system service is called, the service will often run in 
+		privileged mode to gain access to system-private data. Such data is 
+		protected from access by threads executing in user mode. Calls to the 
+		system can be explicit or implicit, such as page faults or interrupts. 
+		Unlike some early operating systems, Windows uses process boundaries for 
+		subsystem protection in addition to the traditional protection of user 
+		and privileged modes. Some work done by Windows on behalf of the 
+		application might appear in other subsystem processes in addition to the 
+		privileged time in the process. 
+
+		Privileged or kernel mode is the processing mode that allows code to 
+		have direct access to all hardware and memory in the system. I/O 
+		operations and other system services run in privileged (kernel) mode; 
+		user applications run in user mode. Unless the processes are 
+		graphics-intensive or I/O-intensive such as file and print services, 
+		most applications should not be processing much work in kernel mode. 
+		Privileged mode corresponds to the percentage of time the processor 
+		spends on execution of Microsoft Windows kernel commands, such as 
+		processing of SQL Server I/O requests. If this counter is consistently 
+		high when the Physical Disk counters are high, consider focusing on 
+		improving the disk subsystem. It is recommended to look for comparitive 
+		trends with other processes, work loads, error counts, and other 
+		behaviors to find what is driving Privileged Time. 
+
+		Note: Different disk controllers and drivers use different amounts of 
+		kernel processing time. Efficient controllers and drivers use less 
+		privileged time, leaving more processing time available for user 
+		applications, increasing overall throughput. 
+
+		Threshold: Yellow: SQL Server is using more than 20% Privileged (kernel) 
+		mode CPU usage Red: SQL Server is using more than 30% Privileged 
+		(kernel) mode CPU usage 
+
+		Next Steps: The key piece to diagnosing high processor conditions is to 
+		determine the ratio of privileged mode to user mode CPU. The counter 
+		'\Processor\% Processor Time' is the sum of '\Processor\% Privileged 
+		Time' and '\Processor\% User Time'. If Privileged Time is pushing the 
+		%Processor Time higher then it is due to processes executing in kernel 
+		mode. If '% User Time' is causing the % Processor Time to be higher then 
+		it is likely a user mode process that is causing the pressure. If 
+		%Privileged Time is consistently high or shows high under load, it could 
+		be several issues. The most common reason for high %Privileged Time is 
+		disk pressure which can be measured by correlating this counter with 
+		Physical Disk reads / sec and Physical Disk writes / sec. If these are 
+		also high you may also see a high number of Page Latch Waits for SQL 
+		Server which can be measured by examining the sys.dm_os_wait_stats 
+		dynamic management view and the perfmon SQL Server:Wait Statistics 
+		perfmon counters. If SQL Server Memory Manager: Page Life Expectancy is 
+		also low try to address by reducing the number of queries that are 
+		performing a high number of logical reads by adding indexes, ensuring 
+		that statistics are up to date, and potentially rewriting the query. You 
+		could add more physical RAM to help raise Page Life Expectancy if it is 
+		low (lower than your baseline, or critical when under 300) although we 
+		only recommend adding memory as an absolute last resort. We first 
+		recommended addressing design and addressing poor indexing first. Adding 
+		physical RAM only masks the real issue. The other potential reasons for 
+		high privileged mode are related to out of date drivers, BIOS being out 
+		of date, failing components, processes that run in kernel mode such as 
+		anti-virus, and other potential issues. 
+
+
+		Reference: 
+		Monitoring CPU Usage
+		http://msdn.microsoft.com/en-us/library/ms178072.aspx 
+		Ask the Performance Team http://blogs.technet.com/askperf/archive/2008/01/18/do-you-know-where-your-processor-spends-its-time.aspx 
+		Clint Huffman's Windows Troubleshooting in the Field Blog http://blogs.technet.com/clinth/archive/2009/10/28/the-case-of-the-2-million-context-switches.aspx  -->
+		<category>Process</category>
+		<name>% Privileged Time</name>
+		<instance>sqlservr</instance>
+		<friendlyname>SQLServerPrivilegedTime</friendlyname>
+		<units>%</units>
+		<warning>20</warning>
+		<critical>30</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+<!-- Access Method Category -->
+	<perfcounter>
+		<!-- \SQLServer:Access Methods\Workfiles Created/sec 
+
+		Description: Number of Workfiles created in the last second. Workfiles 
+		in TempDB are used in processing hash operations when the amount of data 
+		being processed is too big to fit into the available memory. The Work 
+		files are similar to work tables but are created strictly by hashing 
+		operations. Workfiles are used to store temporary results for hash joins 
+		and hash aggregates. Hash joins can require large amounts of memory for 
+		execution. As part of executing a hash join, the memory required for the 
+		hash can become too large and require a spill to disk. The disk storage 
+		to backup the hash operation is called a workfile. Workfiles are 
+		collections of extents and pages that are managed strictly by the 
+		workfile code.
+
+		Threshold: 
+		Yellow: Greater than 20 Workfiles created per second 
+
+		Next Steps: Make queries more efficient by adding/changing indexes. Run 
+		expensive queries through the Database Tuning Advisor (DTA), look for 
+		expensive queries and consider rewriting them, and add as last resort 
+		consider adding additional memory. 
+
+		Reference: 
+
+		SQL Server, Access Methods Object 
+		http://technet.microsoft.com/en-us/library/ms177426.aspx 
+		Working with tempdb in SQL Server 2005 
+		http://msdn.microsoft.com/en-us/library/cc966545.aspx 
+		Troubleshooting Performance Problems in SQL Server 2008 
+		http://download.microsoft.com/download/D/B/D/DBDE7972-1EB9-470A-BA18-58849DB3EB3B/TShootPerfProbs2008.docx -->
+		<category>SQLServer:Access Methods</category>
+		<name>Workfiles Created/sec</name>
+		<instance>none</instance>
+		<friendlyname>WorkfilesCreatedSec</friendlyname>
+		<units>none</units>
+		<warning>20</warning>
+		<critical>30</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:Access Methods\Worktables Created/sec 
+
+		Description: Number of worktables created in the last second. The number 
+		of work tables created per second. Work tables are temporary objects and 
+		are used to store results for query spool, LOB variables, and cursors. 
+
+		Threshold: 
+		Yellow: Greater than 20 Worktables created per second. This will need to 
+		be baselined for accuracy. 
+
+		Next Steps:
+		Look for expensive statements with high CPU, duration, and statements 
+		that run in parallel and tune them by adding indexes, reducing the 
+		volume of data being returned, and adding indexes where appropriate. 
+		Ensure that TempDB is not a bottleneck and is following best practices. 
+		If you determine that the throughput of your application has degraded 
+		because of contention in allocation structures, you can use the 
+		following techniques to minimize it. Evaluate your application and the 
+		query plans to see if you can minimize the creation of work tables and 
+		temporary tables. Monitor the perfmon counters as described in 
+		Monitoring contention caused by DML operations. Then, use SQL Profiler 
+		to correlate the values of these counters with the currently running 
+		queries. This helps you identify the queries that are causing the 
+		contention in allocation structures. Divide TempDB into multiple data 
+		files of equal size. These multiple files don't necessarily need to be 
+		on different disks/spindles unless you are also encountering I/O 
+		bottlenecks as well. The general recommendation is to have one file per 
+		CPU because only one thread is active per CPU at one time. SQL Server 
+		allocates pages for TempDB objects in a round-robin fashion (also 
+		referred to as proportional fill) so that the latches on PFS and SGAM 
+		pages are distributed among multiple files. This is supported both in 
+		SQL Server 2000 and SQL Server 2005. There are improvements to the 
+		proportional fill algorithm in SQL Server 2005. Use TF-1118. Under this 
+		trace flag SQL Server allocates full extents to each TempDB object, 
+		thereby eliminating the contention on SGAM page. This is done at the 
+		expense of some waste of disk space in TempDB. This trace flag has been 
+		available since SQL Server 2000. With improvements in TempDB object 
+		caching since SQL Server 2005, there should be significantly less 
+		contention in allocation structures. If you see contention in SGAM 
+		pages, you may want to use this trace flag. Cached TempDB objects may 
+		not always be available. For example, cached TempDB objects are 
+		destroyed when the query plan with which they are associated is 
+		recompiled or removed from the procedure cache. Note:For each release of 
+		SQL Server, TempDB has more potential uses such as with SNAPSHOT 
+		ISOLATION level, temporary statistics use for read-only databases in SQL 
+		Server 2012 and more. It is recommended to keep a close watch on the 
+		usage of TempDB and leverage the TF1118 if the data file and sizing best 
+		practices do not address allocation bottlenecks. Additionally consider 
+		putting TempDB on local SSD disks in order to maximize disk performance. 
+
+
+		Reference: 
+		SQL Server, Access Methods Object 
+		http://technet.microsoft.com/en-us/library/ms177426.aspx 
+		Working with TempDB in SQL Server 2005 
+		http://msdn.microsoft.com/en-us/library/cc966545.aspx 
+		Troubleshooting Performance Problems in SQL Server 2008 
+		http://download.microsoft.com/download/D/B/D/DBDE7972-1EB9-470A-BA18-58849DB3EB3B/TShootPerfProbs2008.docx  -->
+		<category>SQLServer:Access Methods</category>
+		<name>Worktables Created/sec</name>
+		<instance>none</instance>
+		<friendlyname>WorkTablesCreatedSec</friendlyname>
+		<units>none</units>
+		<warning>20</warning>
+		<critical>30</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:Access Methods Worktables From Cache Ratio 
+
+		Description: Percentage of work tables created where the initial two 
+		pages of the work table were not allocated but were immediately 
+		available from the work table cache. Since SQL Server 2005 worktable 
+		caching was improved. When a query execution plan is cached, the work 
+		tables needed by the plan are not dropped across multiple executions of 
+		the plan but merely truncated. In addition, the first nine pages for the 
+		work table are kept. In SQL Server 2000, the work tables used during 
+		query plan execution are dropped. Because the work table is cached, the 
+		next execution of the query is faster. When the system is low on memory, 
+		the execution plan may be removed from the cache and the associated work 
+		tables dropped as well. Both SQL Server 2000 and SQL Server 2005 use a 
+		small global pool of pre-allocated pages and extents that make the 
+		initial creation of work tables faster. 
+
+		Note: When a work table is dropped, two pages may remain allocated and 
+		they are returned to the work table cache. A value less than 90% may 
+		indicate insufficient memory, since execution plans are being dropped, 
+		or may indicate, on 32-bit systems, the need for an upgrade to a 64-bit 
+		system. 
+
+		Threshold: 
+		Yellow: Less than 90% Worktables from Cache Ratio. This will need to be 
+		baselined for accuracy. 
+
+		Reference:
+		SQL Server, Access Methods Object http://msdn.microsoft.com/en-us/library/ms177426(v=sql.110).aspx -->
+		<category>SQLServer:Access Methods</category>
+		<name>Worktables From Cache Ratio</name>
+		<instance>none</instance>
+		<friendlyname>WorktablesFromCacheRatio</friendlyname>
+		<units>%</units>
+		<warning>20</warning>
+		<critical>10</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+<!-- Buffer Manager Category -->
+	<perfcounter>
+		<!-- \SQLServer:Buffer Manager\Buffer cache hit ratio 
+
+		Description: The Buffer Cache Hit Ratio measures the percentage of pages 
+		that were found in the buffer pool without having to incur a read from 
+		disk. This counter indicates how often SQL Server goes to the buffer, 
+		not the hard disk, to get data. The higher this ratio, the better. A 
+		high ratio, close to 100% indicates that SQL Server did not have to go 
+		to the hard disk often to fetch data, and performance overall is 
+		boosted. If the Buffer Cache Hit Ratio was 100% that would suggest that 
+		all of the pages are being accessed from cache and does not require 
+		trips to disk, because of the optimistic read ahead mechanism, this is 
+		not exactly the case. When a user session wants to read data from the 
+		database, it will read directly from the SQL Server buffer cache (a 
+		logical read), or, if the buffer cache does not have the data that is 
+		requested, the data will be read into the buffer cache from disk (a 
+		physical read) and then from the buffer cache. If the requested data is 
+		in the buffer cache, then it is called a 'buffer hit'. If the data is 
+		not in the buffer cache it is called a 'buffer miss'. The ratio of 
+		buffer hits to total buffer requests is called the buffer cache hit 
+		ratio as can be seen from the following: 
+
+
+		Cache Hit Ratio = (Logical Reads - Physical Reads)/Logical Reads
+
+		A read from memory takes approximately 100 nanoseconds, while a read 
+		from disk takes about 8 milliseconds or more. 1 millisecond = 1,000,000 
+		nanoseconds The important point about SQL Server read operations is that 
+		when selecting data from the database, the user will wait on the 
+		complete read operation including all of the physical reads. The time is 
+		takes to select from the database depends on how much data will be read 
+		and how long it takes for those reads to occur. Even with cache reads, 
+		the time it takes to read a large amount of data can be significant. 
+		With physical reads, the time will be even longer. There are a few 
+		considerations to be aware of regarding the Buffer Cache Hit Ratio 
+		counter. First, unlike many of the other counters available for 
+		monitoring SQL Server, this counter averages the Buffer Cache Hit Ratio 
+		from the time the instance of SQL Server was started. In other words, 
+		this counter is not a real-time measurement, but an average. Secondly, 
+		the buffer cache hit ratio may be skewed by the read ahead mechanism. 
+		Read Ahead Reads are pages that were read into cache while the query was 
+		processed. Read aheads are an optimistic form of physical reads. Because 
+		of the read ahead mechanism, you should not infer from a high buffer 
+		cache hit ratio that SQL Server is not suffering from memory pressure or 
+		at least could not benefit from additional memory. 
+
+		Threshold: 
+		Yellow: Less than 97 percent buffer cache hit ratio 
+		Red: Less than 90 percent buffer cache hit ratio 
+		Next Steps: 
+		Run expensive queries through the Database Tuning Advisor (DTA), add 
+		additional memory, and look for queries with a high number of logical 
+		reads and consider tuning and potentially rewriting them. 
+
+		Reference: 
+		SQL Server, Access Methods Object 
+		http://msdn.microsoft.com/en-us/library/ms177426.aspx -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Buffer cache hit ratio</name>
+		<instance>none</instance>
+		<friendlyname>BufferCacheHitRatio</friendlyname>
+		<units>none</units>
+		<warning>97</warning>
+		<critical>90</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- SQLServer:Buffer Manager\Extension outstanding IO counter 
+		Description: Number of buffer pool extension page reads/writes 
+		outstanding. In other words, this is the I/O queue length for the buffer 
+		pool extension file. 
+
+		Threshold: 
+		Red: Numbers higher than 0 warrants more investigation on the I/O 
+		subsystem latencies. Latency on a disk hosting the Buffer Pool Extension 
+		file should be below 1ms.  -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Extension outstanding IO counter</name>
+		<instance>none</instance>
+		<friendlyname>ExtensionOutstandingIO</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- SQLServer:Buffer Manager\Extension Page Unreferenced Time 
+		Description: Average seconds a page will stay in the buffer pool extension without references.  -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Extension page unreferenced time</name>
+		<instance>none</instance>
+		<friendlyname>ExtensionPageUnreferencedTime</friendlyname>
+		<units>none</units>
+		<warning>300</warning>
+		<critical>700</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--SQLServer:Buffer Manager Free list stalls/sec 
+		Description: Number of requests that had to wait for a free page. Free 
+		list stalls/sec is the frequency with which requests for available 
+		database pages are suspended because no buffers are available. Free list 
+		stall rates of greater than 2 per second indicate too little SQL memory 
+		available. 
+
+		Threshold
+		Yellow - Free list stalls/sec > 2 
+		
+		Reference
+		SQL Server, Buffer Manager Object 
+		http://technet.microsoft.com/en-us/library/ms189628.aspx  -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Free list stalls/sec</name>
+		<instance>none</instance>
+		<friendlyname>FreeListStallsSec</friendlyname>
+		<units>none</units>
+		<warning>2</warning>
+		<critical>3</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:Buffer Manager\Lazy writes/sec 
+
+		Description: The Lazy Writes/sec counter records the number of buffers 
+		written each second by the buffer manager's lazy write process. This 
+		counter tracks how many times a second that the Lazy Writer process is 
+		moving dirty pages from the buffer to disk in order to free up buffer 
+		space. This process is where the dirty, aged buffers are removed from 
+		the buffer by a system process that frees the memory up for other uses. 
+		A dirty, aged buffer is one that has changes and needs to be written to 
+		the disk. High value on this counter possibly indicates I/O issues or 
+		even SQL Server memory problems. The Lazy writes / sec values should 
+		consistently be less than 20 for the average system. Generally speaking, 
+		this should not be a high value, say more than 20 per second or so. 
+		Ideally, it should be close to zero. If it is zero, this indicates that 
+		your SQL Server's buffer cache is plenty big and SQL Server doesn't have 
+		to free up dirty pages, instead waiting for this to occur during regular 
+		checkpoints. If this value is high, then a need for more memory is 
+		indicated. Note: NUMA will increase the number of lazy writer threads 
+		per NUMA node and influence the behavior of the lazy writer by 
+		increasing its execution at this view. If the server is a NUMA 
+		environment other signs of memory pressure should be used and you should 
+		analyze the Buffer Node counters for Page Life Expectancy per node. 
+		There is not a lazy writer counter in Buffer Nodes. 
+
+		Threshold:
+		Red: Greater than 20 Lazy Writes per second 
+		
+		Next Steps: Look for an increase in SQL Server: Buffer Manager: 
+		Checkpoint Pages/sec and SQL Server:Buffer Manager: Lazy Writes/sec 
+		performance object counters because since SQL Server 2005 starts to 
+		flush pages out of the buffer pool cache under memory pressure. 
+
+		Reference: 
+		SQL Server, Access Methods Object 
+		http://msdn.microsoft.com/en-us/library/ms177426.aspx 
+		Configure SQL Server to Use Soft-NUMA
+		http://msdn.microsoft.com/en-us/library/ms345357.aspx -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Lazy writes/sec</name>
+		<instance>none</instance>
+		<friendlyname>LazyWritesSec</friendlyname>
+		<units>none</units>
+		<warning>15</warning>
+		<critical>20</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:Buffer Manager\Page Life Expectancy 
+
+		Description: Number of seconds a page will stay in the buffer pool 
+		without references. This performance monitor counter tells you, on 
+		average, how long data pages are staying in the buffer. Any large drops 
+		of 30% or more should be investigated. Below 600 should be monitored and 
+		very low values near zero are considered a critical state. For 
+		monitoring, we are alerting at a warning level at 600 and a critical 
+		state of lower than 300 seconds, though getting a baseline is the best 
+		approach. When page life expectancy gets too low, this is an indication 
+		that SQL Server is doing too many logical reads putting pressure on the 
+		buffer pool. It is recommended to correlate page life expectancy with 
+		lazy writer activity. When page life expectancy becomes low, then SQL 
+		Server will respond by sweeping through the buffer pool using the lazy 
+		writer, increasing lazy writer activity. Low page life expectancy may 
+		cause more physical reads increasing pressure on disk and slowing down 
+		SQL Server responsiveness. The Page life expectancy counter is 
+		considered one of the most critical counters for SQL Server. If Page 
+		life expectancy becomes low SQL Server will attempt physical reads from 
+		disk into the buffer pool to honor requests. Requests from physical disk 
+		will take considerably longer causing higher disk costs. Note: NUMA 
+		systems will have a CPU and memory grouping per node. If the server is a 
+		NUMA environment you should analyze the Buffer Node counters for Page 
+		Life Expectancy per node. You can tell a server is a NUMA system by 
+		checking the SQL Server error log or by querying sys.dm_os_memory_nodes. 
+		A non-NUMA system will have 2 nodes listed, A NUMA system will have 
+		additional nodes for each of the hardware NUMA nodes in the system. 
+
+
+		Threshold: 
+		Yellow: Page life expectancy is less than 10 minutes (600 seconds) 
+		Red: Page life expectancy is less than 5 minutes (300 seconds)
+
+		Next Steps:
+		If Buffer Manager\Page life expectancy is low then the Buffer 
+		Manager\Lazy Writes /sec will be higher as the Lazy Writer will become 
+		active attempting to free the buffer cache as SQL Server will be under 
+		memory pressure. Due to the disk impact of the physical reads incurred, 
+		the \Physical Disk \Avg. Disk sec/Read counter may also become a 
+		bottleneck as SQL Server is reading from disk instead of the buffer pull 
+		to honor requests. Look for an increase in SQL Server: Buffer Manager: 
+		Checkpoint Pages/sec and SQL Server:Buffer Manager: Lazy Writes/sec 
+		performance object counters because since SQL Server 2005 / 2008 starts 
+		to flush pages out of the buffer pool cache under memory pressure. Run 
+		expensive queries through the Database Tuning Advisor (DTA), look for 
+		queries with a high number of logical reads and consider tuning and 
+		potentially rewriting them, and potentially add additional memory if 
+		non-hardware options to not address the issue. 
+
+		Reference: 
+		SQL Server, Access Methods Object http://msdn.microsoft.com/en-us/library/ms177426.aspx  -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Page life expectancy</name>
+		<instance>none</instance>
+		<friendlyname>BufferManagerPageLifeExpectancy</friendlyname>
+		<units>none</units>
+		<warning>600</warning>
+		<critical>300</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:Buffer Manager\Page Reads_sec 
+		Description: Number of physical database page reads issued per second. 
+		Number of physical database page reads issued. 80 to 90 per second is 
+		normal, anything that is above indicates indexing or memory constraint. 
+
+		Threshold: 
+		Yellow: Page Reads/sec > 90 
+
+		Next Steps: Attempt to tune the application so that fewer I/O operations 
+		are required. For example, perhaps I/O would be reduced if there were 
+		appropriate indexes or if the database design were denormalized. If the 
+		applications cannot be tuned, you will need to acquire disk devices with 
+		more capacity. Compare to the Memory: Pages/sec counter to see if there 
+		is paging while the SQL Server:Buffer Manager\Page reads/sec is high. 
+		Note: Before adjusting the fill factor, at a database level compare the 
+		SQL Server:Buffer Manager\Page reads/sec counter to the SQL 
+		Server:Buffer Manager\Page writes/sec counter, and use the fill factor 
+		option only if writes are a substantial fraction of reads (greater than 
+		30 percent). 
+
+		Reference: 
+		SQL Server, Buffer Manager Object 
+		http://msdn.microsoft.com/en-us/library/ms189628.aspx  -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Page reads/sec</name>
+		<instance>none</instance>
+		<friendlyname>PageReadsSec</friendlyname>
+		<units>none</units>
+		<warning>90</warning>
+		<critical>100</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+	<!--SQLServer:Buffer Manager\Page Writes_sec 
+
+		Description: Number of physical database page writes issued per second. 
+		80 to 90 per second is normal. Anything above 90, it is recommended to 
+		check the lazy writer/sec and Checkpoint pages/sec counter, if these 
+		counters are also relatively high then, this indicates a memory 
+		constraint. 
+
+		Threshold: 
+		Yellow: Page Writes/sec > 90
+
+		Next Steps: Attempt to tune the application so that fewer I/O operations 
+		are required. For example, perhaps I/O would be reduced if there were 
+		appropriate indexes or if the database design were denormalized. If the 
+		applications cannot be tuned, you will need to acquire disk devices with 
+		more capacity. Compare to the Memory: Pages/sec counter to see if there 
+		is paging while the SQL Server:Buffer Manager\Page reads/sec is high. 
+		Note: Before adjusting the fill factor, at a database level compare the 
+		SQL Server:Buffer Manager\Page reads/sec counter to the SQL 
+		Server:Buffer Manager\Page writes/sec counter, and use the fill factor 
+		option only if writes are a substantial fraction of reads (greater than 
+		30 percent). 
+
+		Reference: 
+		SQL Server, Buffer Manager Object 
+		http://msdn.microsoft.com/en-us/library/ms189628.aspx cate insufficient memory and indexing issues -->
+		<category>SQLServer:Buffer Manager</category>
+		<name>Page writes/sec</name>
+		<instance>none</instance>
+		<friendlyname>PageWritesSec</friendlyname>
+		<units>none</units>
+		<warning>90</warning>
+		<critical>100</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- Databases Category -->
+	<perfcounter>
+		<!--\SQLServer:Databases\Log Flush Wait Time 
+		Description: Total wait time (milliseconds). 
+		It means every transaction statement must wait in average X ms to commit. If you don't use 
+		explicit transactions for writes it means each write statement (INSERT/UPDATE/DELETE) must 
+		wait X ms to complete.
+		If this does not corroborate with 'PhysicalDisk\Avg. Disk sec/Write For the Log Files volume, 
+		one explanation is that you have log growths (if you do, the counters say so) which skew the 
+		log flush wait times but that would only explain averages over long periods.-->
+		<category>SQLServer:Databases</category>
+		<name>Log Flush Wait Time</name>
+		<instance>_Total</instance>
+		<friendlyname>LogFlushWaitTime</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--\SQLServer:Databases\Log Flush Waits/sec
+		Description: Number of commits waiting on log flush. -->
+		<category>SQLServer:Databases</category>
+		<name>Log Flush Waits/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>LogFlushWaitsSec</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--\SQLServer:Databases\Log Grows
+		Description: Total number of times the transaction log for the database has been expanded. 
+		Figure out which database is growing and resize the log appropriately. You should not occur 
+		growth events in production, they are extremely expensive. the counter has instances per database.-->
+		<category>SQLServer:Databases</category>
+		<name>Log Growths</name>
+		<instance>_Total</instance>
+		<friendlyname>LogGrowths</friendlyname>
+		<units>none</units>
+		<warning>1000</warning>
+		<critical>10000</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--\SQLServer:Databases\Log Shrinks 
+		Description: Total number of log shrinks for this database. -->
+		<category>SQLServer:Databases</category>
+		<name>Log Shrinks</name>
+		<instance>_Total</instance>
+		<friendlyname>LogShrinks</friendlyname>
+		<units>none</units>
+		<warning>1000</warning>
+		<critical>10000</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--\SQLServer:Databases\Percent Log Used
+		Description: The percent of space in the log that is in use. -->
+		<category>SQLServer:Databases</category>
+		<name>Percent Log Used</name>
+		<instance>_Total</instance>
+		<friendlyname>PercentLogUsed</friendlyname>
+		<units>none</units>
+		<warning>80</warning>
+		<critical>90</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- General Statistics Category -->
+	<perfcounter>
+		<!-- \SQLServer:General Statistics\Logins/sec 
+
+		Description: 
+		Login and logout rates should be approximately the same. A login rate 
+		higher than the logout rate suggests that the server is not in a steady 
+		state, or that applications are not correctly using connection pooling. 
+		This could result in an increased load on the server. 
+
+		Next Steps: 
+		Verify if the .NET connection string is using the pooling=true e 
+		connection reset=true parameters. If so, a profiler trace with the Audit 
+		login and Audit logout Events would reveal the usage of 
+		sp_reset_connection stored procedure, which is used by SQL Server to 
+		support remote stored procedure calls in a transaction. This stored 
+		procedure also causes Audit Login and Audit Logout events to fire when a 
+		connection is reused from a connection pool. Also, the EventSubClass 
+		column in the trace will show if the connections are being pooled or 
+		not. Therefore focus the comparison only on the rate of non-pooled 
+		Logins and Logouts, as pooled connections will be reflected in the 
+		Logins/sec counter, but not on the Logouts/sec counter. 
+
+		Reference: 
+		SQL Server 2012 Books Online: SQL Server: General Statistics Object 
+		http://technet.microsoft.com/en-us/library/ms190697(v=sql.110).aspx 
+		SQL Server Connection Pooling 
+		http://msdn.microsoft.com/en-us/library/8xx3tyca.aspx 
+		SQL Server 2012 Books Online: Audit Login Event Class 
+		http://msdn.microsoft.com/en-us/library/ms190260(v=sql.110).asp -->
+		<category>SQLServer:General Statistics</category>
+		<name>Logins/sec</name>
+		<instance>none</instance>
+		<friendlyname>LoginsSec</friendlyname>
+		<units>none</units>
+		<warning>2</warning>
+		<critical>10</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--SQLServer:General Statistics Logouts/sec 
+
+		Description: Total number of logouts started per second. Greater 
+		than 2 per second indicates that the application is not correctly 
+		using connection pooling. -->
+		<category>SQLServer:General Statistics</category>
+		<name>Logouts/sec</name>
+		<instance>none</instance>
+		<friendlyname>LogoutsSec</friendlyname>
+		<units>none</units>
+		<warning>2</warning>
+		<critical>10</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- SQLServer:General Statistics\User Connections 
+
+		Description: Number of users connected to the system. The number of 
+		users currently connected to the SQL Server. This should correlate with 
+		the Batch Requests per second counter. -->
+		<category>SQLServer:General Statistics</category>
+		<name>User Connections</name>
+		<instance>none</instance>
+		<friendlyname>UserConnections</friendlyname>
+		<units>none</units>
+		<warning>600</warning>
+		<critical>700</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- SQLServer:General Statistics\Processes blocked
+		The processes blocked counter identifies the number of blocked processes.
+		When one process is blocking another process, the blocked process cannot move forward with its execution plan until the resource that is causing it to wait is freed up.
+		Ideally you don't want to see any blocked processes. When processes are being blocked you should investigate. -->
+		<category>SQLServer:General Statistics</category>
+		<name>Processes blocked</name>
+		<instance>none</instance>
+		<friendlyname>ProcessesBlocked</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- Latch Category -->
+	<perfcounter>
+		<!-- \SQLServer:Latches\Total Latch Wait Time (ms)
+
+		References the total latch wait time in milliseconds for latch requests 
+		that had to wait in the last second. If the total latch wait time is 
+		above 500 milliseconds per each second on average, your SQL Server may 
+		be spending too much time waiting on the various latches. It could also 
+		be facing resource contention as a result. Recommendation: Review the 
+		wait statistics on the server to find the top resources that the SQL 
+		Server is waiting on. 
+
+		Reference: 
+		Performance Tuning Waits and Queues 
+		http://www.microsoft.com/technet/prodtechnol/sql/bestpractice/performance_tuning_waits_queues.mspx --> 
+		<category>SQLServer:Latches</category>
+		<name>Total Latch Wait Time (ms)</name>
+		<instance>none</instance>
+		<friendlyname>TotalLatchWaitTime</friendlyname>
+		<units>none</units>
+		<warning>500</warning>
+		<critical>700</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- Locks Category -->
+	<perfcounter>
+	<!-- \SQLServer:Locks Lock\Requests/sec
+ 
+	Description: Number of new locks and lock conversions requested from the 
+	lock manager. This value should tie close to the number of Batch 
+	Requests per second. Values greaters than 1000 may indicate queries are 
+	pulling large volumes of data thereby accessing large numbers of rows 
+
+	Threshold 
+	Yellow Greater than > 1000 Lock Requests / sec
+
+	Reference:
+	SQL Server, Locks Object 
+	http://msdn.microsoft.com/en-us/library/ms190216.aspx --> 
+	<category>SQLServer:Locks</category>
+		<name>Lock Requests/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>LockRequestsSec</friendlyname>
+		<units>none</units>
+		<warning>1000</warning>
+		<critical>1500</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+	<!-- \SQLServer:Locks(*)\Lock Timeouts/sec
+
+	Description: Number of lock requests that timed out. This does not 
+	include requests for NOWAIT locks. A value greater than zero might 
+	indicate that user queries are not completing. 
+
+	Threshold
+	Yellow Greater than 1  -->
+	<category>SQLServer:Locks</category>
+		<name>Lock Timeouts/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>LockTimeoutsSec</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+	<!-- \SQLServer:Locks(*)\Lock Wait Time (ms)
+
+	Total wait time (milliseconds) for locks that started in the last 
+	second. Although a sustained average of 500 or more milliseconds can 
+	indicate that your SQL Server is spending too much time waiting for 
+	locks, also watch for peaks that exceed 60 seconds for extended blocking 
+	for a given workload in your system. Recommendation: Look for peaks that 
+	approach or exceed 60 seconds. Even though this counter counts how many 
+	total milliseconds SQL Server is waiting on locks over the last second, 
+	the counter actually records the lock wait time for a particular lock 
+	wait at the end of the locking event. The following methods can be used 
+	to reduce lock contention and increase overall throughput: 
+
+	Avoid situations in which many processes are attempting to perform 
+	updates or inserts on the same data page. 
+
+	Avoid transactions that include user interaction. Because locks are held 
+	for the duration of the transaction, a single user can degrade the 
+	entire systems performance. 
+
+	Keep transactions that modify data as short as possible. The longer the 
+	transaction, the longer the exclusive or update locks are held. This 
+	blocks other activity and can lead to an increased number of deadlock 
+	situations. 
+
+	Keep transactions in one batch. Unanticipated network problems may delay 
+	transactions from completing and thus releasing locks. 
+
+	Avoid pessimistic locking hints such as holdlock whenever possible. They 
+	can cause processes to wait even on shared locks. 
+
+	In most cases, you should use SQL Server's default isolation level. The 
+	isolation level determines at what point the tradeoffs are made between 
+	concurrency and consistency. If you have a strong business need for a 
+	higher isolation level, make sure that you evaluate all the tradeoffs 
+	and perform thorough testing under a high stress load. 
+
+	Reduce the fillfactor when creating an index to help diminish the chance 
+	of random updates requiring the same page. This is especially useful for 
+	small tables that are frequently accessed. 
+
+	If you are using DB-Library (DB-Lib), optimistic concurrency control can 
+	be specified by using the CCUR_OPTCC setting in dbcursoropen(). This 
+	option ensures that update locks are obtained only when a user wants to 
+	commit a transaction.  -->
+	<category>SQLServer:Locks</category>
+		<name>Lock Wait Time (ms)</name>
+		<instance>_Total</instance>
+		<friendlyname>LockWaitTime</friendlyname>
+		<units>none</units>
+		<warning>500</warning>
+		<critical>700</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!--\SQLServer:Locks\Lock Waits/sec 
+
+		Description: Number of lock requests that could not be satisfied 
+		immediately and required the caller to wait before being granted the 
+		lock. This is a sign that there is some blocking occuring and would be a 
+		good baseline measurement of lock waits for load testing. Note: Lock 
+		waits are not recorded by until after the lock event completes. For 
+		examining active blocking it is recommended to query 
+		sys.dm_os_waiting_tasks. 
+
+		Threshold
+		Yellow Values greater than 0 -->
+		<category>SQLServer:Locks</category>
+		<name>Lock Waits/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>LockWaitsSec</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+	<!-- \SQLServer:Locks(*)\Number of Deadlocks/sec
+
+	Description:
+	Number of lock requests, per second, which resulted in a deadlock. 
+	Deadlocks are always an issue that should be resolved. A deadlock 
+	transaction that is killed must be rerun. It is recommended to use the 
+	SQL Trace deadlock graph, trace flag 1222, and the extended events 
+	deadlock capture to help identify and solve all of the deadlocks in your 
+	environment. 
+
+	Threshold
+	Red Any Deadlocks greater than 0 
+
+	Resources 
+	Bart Duncan Deadlock Resources
+	Part 1 - http://blogs.msdn.com/b/bartd/archive/2006/09/09/deadlock-troubleshooting_2c00_-part-1.aspx 
+	Part 2 - http://blogs.msdn.com/b/bartd/archive/2006/09/13/751343.aspx 
+	Part 3 - http://blogs.msdn.com/b/bartd/archive/2006/09/25/770928.aspx 
+	Getting historical deadlock info using extended events
+	http://www.sqlskills.com/BLOGS/PAUL/post/Getting-historical-deadlock-info-using-extended-events.aspx -->
+	<category>SQLServer:Locks</category>
+		<name>Number of Deadlocks/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>NumberOfDeadlocksSec</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- Memory Manager Category -->
+	<perfcounter>
+		<!-- Amount of memory currently assigned to SQL Server
+		If the Total Server Memory (KB) value is consistently high, 
+		it means that SQL Server is constantly using a lot of memory and 
+		that the server is under memory pressure -->
+		<category>SQLServer:Memory Manager</category>
+		<name>Total Server Memory (KB)</name>
+		<instance>none</instance>
+		<friendlyname>TotalServerMemory</friendlyname>
+		<units>KB</units>
+		<warning>80%</warning>
+		<critical>90%</critical>
+		<min>0</min>
+		<max>automemory</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Shows how much memory SQL Server needs to for best performance
+		When the Total Server Memory and Target Server Memory values 
+		are close, there’s no memory pressure on the server -->
+		<category>SQLServer:Memory Manager</category>
+		<name>Target Server Memory (KB)</name>
+		<instance>none</instance>
+		<friendlyname>TargetServerMemory</friendlyname>
+		<units>KB</units>
+		<warning>85%</warning>
+		<critical>95%</critical>
+		<min>0</min>
+		<max>automemory</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Its value shows the total number of SQL Server processes that 
+		are waiting to be granted workspace in the memory
+		The recommended Memory Grants Pending value is zero, meaning 
+		no processes are waiting for the memory, as there’s enough memory 
+		so the processes are not queued.
+		If the value is constantly above 0, try with increasing the Maximum 
+		Server Memory value -->
+		<category>SQLServer:Memory Manager</category>
+		<name>Memory Grants Pending</name>
+		<instance>none</instance>
+		<friendlyname>MemoryGrantsPending</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- SQL Errors Category -->
+	<perfcounter>
+		<!-- \SQLServer:SQL Errors(*)\Errors/sec
+		Number of errors/sec -->
+		<category>SQLServer:SQL Errors</category>
+		<name>Errors/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>ErrorsSec</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>10</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+<!-- SQL Statistics -->
+	<perfcounter>
+		<!-- \SQLServer:SQL Statistics\Batch Requests/sec 
+		Batch Requests/Sec measures the number of batches SQL Server 
+		is receiving per second. This counter is a good indicator of how 
+		much activity is being processed by your SQL Server box.
+		The higher the number, the more queries are being executed 
+		on your box. Like many counters, there is no single number 
+		that can be used universally to indicate your machine is too busy.
+		Today’s machines are getting more and more powerful all the 
+		time and therefore can process more batch requests per second.
+		You should review this counter over time to determine a baseline 
+		number for your environment. -->
+		<category>SQLServer:SQL Statistics</category>
+		<name>Batch Requests/sec</name>
+		<instance>none</instance>
+		<friendlyname>BatchRequestsSec</friendlyname>
+		<units>none</units>
+		<warning>1000</warning>
+		<critical>2000</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- \SQLServer:SQL Statistics\SQL Attention rate
+
+		Number of attentions per second. Attentions are the number of user 
+		cancels and query timeout that occured per second. A high number of 
+		attentions may indicate slow query performance as users are cancelling 
+		queries. -->
+		<category>SQLServer:SQL Statistics</category>
+		<name>SQL Attention rate</name>
+		<instance>none</instance>
+		<friendlyname>SQLAttentionRate</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>2</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+</perfcounters>

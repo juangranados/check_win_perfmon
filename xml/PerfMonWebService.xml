@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- References -->
+<!-- https://blog.serverdensity.com/monitor-iis/ -->
+<!-- https://support.microsoft.com/en-us/help/313064/how-to-monitor-web-server-performance-by-using-counter-logs-in-system -->
+<perfcounters>
+	<perfcounter>
+		<!-- Shows the rate that data is received by the Web service. -->
+		<category>Web Service</category>
+		<name>Bytes received/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>BytesReceivedSec</friendlyname>
+		<units>B</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Shows the rate that data is sent by the Web service. -->
+		<category>Web Service</category>
+		<name>Bytes sent/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>BytesSentSec</friendlyname>
+		<units>B</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Indicates the total rate of bytes transferred by the Web service. -->
+		<category>Web Service</category>
+		<name>Connection attempts/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>ConnectionAttemptsSec</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Rate of HTTP GET requests. High values indicate that your web server is overloaded. -->
+		<category>Web Service</category>
+		<name>Get Requests/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>GetRequestsSec</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Rate of HTTP POST requests. High values indicate that your web server is overloaded. -->
+		<category>Web Service</category>
+		<name>Post Requests/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>PostRequestsSec</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- number of current connections to the Web service. This counter’s interpretation depends upon many variables, --> 
+		<!-- such as the type of requests (ISAPI, CGI, static HTML, etc.), CPU utilization, et cetera. -->
+		<category>Web Service</category>
+		<name>Current Connections</name>
+		<instance>_Total</instance>
+		<friendlyname>CurrentConnections</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Number of requests in the queue --> 
+		<category>HTTP Service Request Queues</category>
+		<name>CurrentQueueSize</name>
+		<instance>DefaultAppPool</instance>
+		<friendlyname>CurrentQueueSize</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>3</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- The number of milliseconds the most recent request was waiting in the queue. --> 
+		<category>ASP.NET</category>
+		<name>Request Wait Time</name>
+		<instance>none</instance>
+		<friendlyname>ASPRequestWaitTime</friendlyname>
+		<units>none</units>
+		<warning>10</warning>
+		<critical>30</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- The number of requests waiting to be processed. --> 
+		<category>ASP.NET</category>
+		<name>Requests Queued</name>
+		<instance>none</instance>
+		<friendlyname>ASPRequestQueued</friendlyname>
+		<units>none</units>
+		<warning>1</warning>
+		<critical>5</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- Transactions started per second. --> 
+		<category>ASP.NET Applications</category>
+		<name>Transactions/Sec</name>
+		<instance>__Total__</instance>
+		<friendlyname>ASPTransactionsSec</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<!-- The ratio of File Cache Hits to total cache requests. --> 
+		<category>Internet Information Services Global</category>
+		<name>File Cache Hits %</name>
+		<instance>none</instance>
+		<friendlyname>IISFileCacheHitsPercent</friendlyname>
+		<units>%</units>
+		<warning>none</warning>
+		<critical>none</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+</perfcounters>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- References -->
+<!-- https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/hyper-v-server/detecting-virtualized-environment-bottlenecks -->
+<!-- https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/01/looking-at-dynamic-memory-performance-counters/ -->
+<!-- https://docs.microsoft.com/en-us/biztalk/technical-guides/checklist-measuring-performance-on-hyper-v -->
+<!-- https://blogs.technet.microsoft.com/neales/2016/11/22/hyper-v-performance-memory/ -->
+<perfcounters>
+	<!-- 
+	The percentage of time spent by the processor in guest and hypervisor code.
+	If the Hyper-V Hypervisor Logical Processor(_Total)\% Total Runtime 
+	counter is over 90%, the host is overloaded. You should add more 
+	processing power or move some virtual machines to a different host. 
+	This analysis checks the processor utilization of physical processors of 
+	the host computer. The "\Hyper-V Hypervisor Logical Processor(*)\% Total 
+	Run Time" performance counter is more accurate than using the "% 
+	Processor Time" counter on the host, root partition computer because the 
+	"% Processor Time" counter only measures the processor time of the host, 
+	root partition computer only. The "\Hyper-V Hypervisor Logical 
+	Processor(*)\% Total Run Time" performance counter is the best counter 
+	to use to analyze overall processor utilization of the Hyper-V server. 
+	-->
+	<perfcounter>
+		<category>Hyper-V Hypervisor Logical Processor</category>
+		<name>% Total Run Time</name>
+		<instance>_Total</instance>
+		<friendlyname>HypervisorLogicalProcessorTotalRuntime</friendlyname>
+		<units>%</units>
+		<warning>75</warning>
+		<critical>90</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<!-- This analysis checks the processor utilization of guest, virtual 
+	computer processors. The "\Hyper-V Hypervisor Virtual Processor(*)\% 
+	Guest Run Time" performance counter is more accurate than using the "% 
+	Processor Time" counter within the virtual computer due to clock 
+	calculation drift. 
+	-->
+	<perfcounter>
+		<category>Hyper-V Hypervisor Virtual Processor</category>
+		<name>% Guest Run Time</name>
+		<instance>_Total</instance>
+		<friendlyname>HypervisorVirtualProcessorGuestRuntime</friendlyname>
+		<units>%</units>
+		<warning>75</warning>
+		<critical>90</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<!--
+	This counter represents the number of virtual machines that have 
+	critical health. If anything is critical it means some resource, (most 
+	likely a disk), has been exhausted or some other unrecoverable error has 
+	occurred 
+	-->
+	<perfcounter>
+		<category>Hyper-V Virtual Machine Health Summary</category>
+		<name>Health Critical</name>
+		<instance>none</instance>
+		<friendlyname>VirtualMachineHealthCritical</friendlyname>
+		<units>none</units>
+		<warning>none</warning>
+		<critical>gt1</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<!-- 
+	This is the memory available for virtual machine usage on a Hyper-V 
+	host, while ensuring that there is sufficient memory available for 
+	Hardware and Hyper-V management. 
+	Threshold: < 2GB
+	What to do if threshold is breached: 
+	Check for many VMs with memory pressure < 60%, if so, reduce min memory 
+	Check for static memory assignment VMs that have been assigned more than 
+	needed (DM candidates?) 
+	Check Dynamic Memory is responding on virtual machines enabled for 
+	Dynamic Memory (a value for the “Average Pressure” value provides that). 
+	Reduce memory usage on hosts (load balance VMs between hosts?) 
+	-->	
+	<perfcounter>
+		<category>Hyper-V Dynamic Memory Balancer</category>
+		<name>Available Memory</name>
+		<instance>System Balancer</instance>
+		<friendlyname>DynamicMemoryBalancerAvailableMemory</friendlyname>
+		<units>MB</units>
+		<warning>1024</warning>
+		<critical>512</critical>
+		<min>none</min>
+		<max>automemory</max>
+	</perfcounter>
+	<!-- 
+	Pressure is synonymous with availability. This is a calculation of how 
+	much memory the VM wants divided by the amount of memory the VM 
+	currently has and then multiplied by 100 [ie; (Mem Wanted/Mem 
+	allocated)*100 ] Average pressure at this level is the average pressure 
+	of all VM’s at any given time. As long as this number stays under 100, 
+	you have enough available memory to service all virtual machines. If you 
+	go over 100, then you have VM’s that are doing paging operations with 
+	the VM itself and you will see performance degradation. For best 
+	performance with less risk of paging operations, this number should 
+	consistently be below 100 with no spikes above. Ideally around 80, 
+	though highly tuned systems that are very dense may run higher. 
+	-->	
+	<perfcounter>
+		<category>Hyper-V Dynamic Memory Balancer</category>
+		<name>Average Pressure</name>
+		<instance>System Balancer</instance>
+		<friendlyname>DynamicMemoryBalancerAveragePressure</friendlyname>
+		<units>%</units>
+		<warning>95</warning>
+		<critical>100</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+</perfcounters> 

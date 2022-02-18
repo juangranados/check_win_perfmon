@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Source: https://github.com/clinthuffman/PAL -->
+<perfcounters>
+	<!-- Number of bytes per second printed on a print queue. -->
+	<perfcounter>
+		<category>Print Queue</category>
+		<name>Bytes Printed/sec</name>
+		<instance>_Total</instance>
+		<friendlyname>BytesPrintedSec</friendlyname>
+		<units>B</units>
+		<warning>104857600</warning>
+		<critical>125829120</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<!-- Total number of job errors in a print queue since last restart. -->
+	<perfcounter>
+		<category>Print Queue</category>
+		<name>Job Errors</name>
+		<instance>_Total</instance>
+		<friendlyname>PrinterJobErrors</friendlyname>
+		<units>none</units>
+		<warning>50</warning>
+		<critical>100</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<!--  Percentage of elapsed time that all of process spooler threads used the processor to execution instruction -->
+	<perfcounter>
+		<category>Process</category>
+		<name>% Processor Time</name>
+		<instance>spoolsv</instance>
+		<friendlyname>SpoolerProcessorTime</friendlyname>
+		<units>%</units>
+		<warning>50</warning>
+		<critical>75</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+</perfcounters>

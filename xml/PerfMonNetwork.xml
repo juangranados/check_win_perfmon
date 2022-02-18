@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>Network Adapter</category>
+		<name>Bytes Total/Sec</name>
+		<instance>auto</instance>
+		<friendlyname>BytesTotalSec</friendlyname>
+		<units>B</units>
+		<warning>85%</warning>
+		<critical>95%</critical>
+		<min>0</min>
+		<max>autonetwork</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Network Adapter</category>
+		<name>Output Queue Length</name>
+		<instance>auto</instance>
+		<friendlyname>OutputQueueLength</friendlyname>
+		<units></units>
+		<warning>2</warning>
+		<critical>3</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+</perfcounters> 

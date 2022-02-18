@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% Processor Time</name>
+		<instance>_Total</instance>
+		<friendlyname>ProcessorTime</friendlyname>
+		<units>%</units>
+		<warning>95</warning>
+		<critical>100</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% User Time</name>
+		<instance>_Total</instance>
+		<friendlyname>UserTime</friendlyname>
+		<units>%</units>
+		<warning>85</warning>
+		<critical>95</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% DPC Time</name>
+		<instance>_Total</instance>
+		<friendlyname>DPCTime</friendlyname>
+		<units>%</units>
+		<warning>15</warning>
+		<critical>20</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Processor</category>
+		<name>% Interrupt Time</name>
+		<instance>_Total</instance>
+		<friendlyname>InterruptTime</friendlyname>
+		<units>%</units>
+		<warning>10</warning>
+		<critical>15</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>System</category>
+		<name>Processor Queue Length</name>
+		<instance>none</instance>
+		<friendlyname>ProcessorQueueLength</friendlyname>
+		<units>none</units>
+		<warning>4</warning>
+		<critical>8</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+</perfcounters> 

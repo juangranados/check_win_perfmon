@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<perfcounters>
+	<perfcounter>
+		<category>Memory</category>
+		<name>% Committed Bytes In Use</name>
+		<instance>none</instance>
+		<friendlyname>CommittedBytesInUse</friendlyname>
+		<units>%</units>
+		<warning>90</warning>
+		<critical>95</critical>
+		<min>0</min>
+		<max>100</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Memory</category>
+		<name>Available MBytes</name>
+		<instance>none</instance>
+		<friendlyname>AvailableMBytes</friendlyname>
+		<units>MB</units>
+		<warning>1024</warning>
+		<critical>512</critical>
+		<min>0</min>
+		<max>automemory</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Memory</category>
+		<name>Free System Page Table Entries</name>
+		<instance>none</instance>
+		<friendlyname>FreeSystemPageTableEntries</friendlyname>
+		<units>none</units>
+		<warning>5000</warning>
+		<critical>4000</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+	<perfcounter>
+		<category>Memory</category>
+		<name>Pages/sec</name>
+		<instance>none</instance>
+		<friendlyname>PagesSec</friendlyname>
+		<units>none</units>
+		<warning>5000</warning>
+		<critical>6000</critical>
+		<min>none</min>
+		<max>none</max>
+	</perfcounter>
+</perfcounters> 

@@ -188,7 +188,7 @@ namespace check_win_perfmon.Test
             var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "gt90", "none", "0", "100");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
-            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "lt10%", "none", "0", "auto");
+            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "lt10%", "none", "0", "automemory");
             CalculatePerfCounter(perfCounter2);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
         }
@@ -201,7 +201,7 @@ namespace check_win_perfmon.Test
             var perfCounter = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "none", "gt90", "0", "100");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
-            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "lt10%", "0", "auto");
+            var perfCounter2 = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "lt10%", "0", "automemory");
             CalculatePerfCounter(perfCounter2);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 0);
         }
@@ -246,7 +246,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_SimulateReverseWarning_StatusWarning()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "95%", "10%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "95%", "10%", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
@@ -259,7 +259,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_SimulateReverseCritical_StatusCritical()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "95%", "90%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "95%", "90%", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
@@ -292,7 +292,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_SimulateOnlyLessWarning_StatusWarning()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "lt90%", "none", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "lt90%", "none", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 1);
         }
@@ -303,7 +303,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_SimulateOnlyLessCritical_StatusCritical()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "lt90%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "none", "lt90%", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.CounterStatus.GetNagiosExitCode(), 2);
         }
@@ -313,7 +313,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_InterfaceSpeedAutodetection_InterfaceSpeedAsMax()
         {
-            var perfCounter = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B", "80%", "90%", "0", "auto");
+            var perfCounter = new PerfCounter("Network Adapter", "Bytes Total/Sec", "autonetwork", "BytesTotalSec", "B", "80%", "90%", "0", "autonetwork");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.GetMax(), GetNetworkInterfaceSpeed(GetNetworkInterface()));
         }
@@ -323,7 +323,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_SystemMemoryAutodetection_SystemMemoryAsMax()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             Assert.AreEqual(perfCounter.GetMax(), GetTotalMemory("MB"));
         }
@@ -333,13 +333,13 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_WarningAndCriticalPercentCalculation_WarningAndCriticalPercent()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "automemory");
             CalculatePerfCounter(perfCounter);
             float systemMemory = GetTotalMemory("MB");
             Assert.AreEqual(perfCounter.GetWarning(), systemMemory * 10 / 100);
             Assert.AreEqual(perfCounter.GetCritical(), systemMemory * 5 / 100);
 
-            perfCounter = new PerfCounter("Network Adapter", "Bytes Total/Sec", "auto", "BytesTotalSec", "B", "80%", "90%", "0", "auto");
+            perfCounter = new PerfCounter("Network Adapter", "Bytes Total/Sec", "autonetwork", "BytesTotalSec", "B", "80%", "90%", "0", "autonetwork");
             CalculatePerfCounter(perfCounter);
             var interfaceSpeed = GetNetworkInterfaceSpeed(GetNetworkInterface());
             Assert.AreEqual(perfCounter.GetWarning(), interfaceSpeed * 80 / 100);
@@ -351,7 +351,7 @@ namespace check_win_perfmon.Test
         [TestMethod]
         public void PerfCounter_CalculateAverageResult_AverageResult()
         {
-            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "auto");
+            var perfCounter = new PerfCounter("Memory", "Available MBytes", "none", "AvailableMBytes", "MB", "10%", "5%", "0", "automemory");
             float result = 0;
             perfCounter.Initialize();
             System.Threading.Thread.Sleep(1000);

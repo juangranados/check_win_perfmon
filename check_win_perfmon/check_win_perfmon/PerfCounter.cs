@@ -12,6 +12,10 @@ namespace check_win_perfmon
     /// https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter.instancename.aspx
     public class PerfCounter
     {
+        private const string autoMemory = "automemory";
+        private const string autoNetwork = "autonetwork";
+        private const string autoDisk = "autodisk";
+
         // Performance counter System object.
         private PerformanceCounter _performanceCounter;
         // Status of performance counter: OK, Warning or Critical
@@ -61,8 +65,8 @@ namespace check_win_perfmon
         /// </summary>
         public string PerfString { get; private set; }
         // Getters
-        public float GetWarning(){ return _warning; }
-        public float GetCritical(){ return _critical; }
+        public float GetWarning() { return _warning; }
+        public float GetCritical() { return _critical; }
         public float GetMax() { return _max; }
         public float GetMin() { return _min; }
         public float GetResult() { return _result; }
@@ -96,7 +100,7 @@ namespace check_win_perfmon
             //Min and max can not be the same, only in case of "none"
             if (min == max && min != "none")
             {
-                throw new ArgumentException($"Min and max can not be the same on {counterName}",nameof(max));
+                throw new ArgumentException($"Min and max can not be the same on {counterName}", nameof(max));
             }
             // Create new performance counter object
             try
@@ -104,43 +108,39 @@ namespace check_win_perfmon
                 // Performance counter with instance
                 if (instanceName != "none")
                 {
-                    //If instance name is "auto", try to detect instance
-                    if (instanceName == "auto")
-                    {
-                        switch (categoryName)
+                    if ((instanceName == autoNetwork) || (instanceName == autoDisk)) {
+                        //If instance name is "autonetwork", try to detect instance
+                        if (instanceName == autoNetwork)
                         {
-                            //Auto detect physical interface or adapter.
-                            case "Network Interface":
-                            case "Network Adapter":
-                                // Get network interface connected to Internet.
-                                _interfacename = Utils.GetNetworkInterface();
-                                // Check if _interfacename has forbidden characters and change to performance counters convention
-                                instanceName = Utils.NormalizeNetworkInterface(_interfacename);
-                                // If Utils.GetNetworkInterface() cannot detect network interface connected to Internet, throw exception
-                                if (instanceName == "unknown")
-                                {
-                                    throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", nameof(instanceName));
-                                }
-                                break;
-                            //Auto detect physical disk 
-                            case "PhysicalDisk":
-                                // Auto detect physical disk 0
-                                instanceName = Utils.GetDiskName();
-                                // If Utils.GetDiskName() cannot detect physical disk 0, throw exception
-                                if (instanceName == "_total")
-                                {
-                                    throw new ArgumentException($"Error detecting physical disk 0 on \\{categoryName}\\{counterName}.", nameof(instanceName));
-                                }
-                                break;
-                            // Parameter auto for instanceName is only supported for Network Interface, Network Adapter and PhysicalDisk
-                            default:
-                                throw new ArgumentException(
-                                    $"Parameter auto not supported for \\{categoryName}\\{counterName} counter instance.", nameof(instanceName));
+                            // Get network interface connected to Internet.
+                            _interfacename = Utils.GetNetworkInterface();
+                            // Check if _interfacename has forbidden characters and change to performance counters convention
+                            instanceName = Utils.NormalizeNetworkInterface(_interfacename);
+                            // If Utils.GetNetworkInterface() cannot detect network interface connected to Internet, throw exception
+                            if (instanceName == "unknown")
+                            {
+                                throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", nameof(instanceName));
+                            }
+                        }
+                        else if (instanceName == autoDisk)
+                        {
+                            // Auto detect physical disk 0
+                            instanceName = Utils.GetDiskName();
+                            // If Utils.GetDiskName() cannot detect physical disk 0, throw exception
+                            if (instanceName == "_total")
+                            {
+                                throw new ArgumentException($"Error detecting physical disk 0 on \\{categoryName}\\{counterName}.", nameof(instanceName));
+                            }
+                        }
+                        else
+                        {
+                            // Parameter auto for instanceName is only supported for Network and PhysicalDisk
+                            throw new ArgumentException(
+                            $"Parameter {instanceName} not supported. Only autonetwork for Network inteface and autodisk for PhysicalDisk 0 are supported", nameof(instanceName));
                         }
                         // Write verbose auto detection has been successful
                         WriteVerbose($"Detected instance {instanceName} for counter \\{categoryName}\\{counterName}");
                     }
-
                     // Create performance counter with instance
                     _performanceCounter = new PerformanceCounter(categoryName, counterName, instanceName, true);
                     // Save performance counter string to ease verbose outputs.
@@ -165,12 +165,13 @@ namespace check_win_perfmon
                 throw new Exception($"Error creating performance counter \\{categoryName}\\{counterName}: " + e.Message);
             }
 
+
             // Assign friendly name without spaces or non ASCII characters
             _friendlyName = Regex.Replace(friendlyName != "none" ? friendlyName : counterName, @"[^A-Za-z0-9]+", "");
-            
+
             // Check if counter has measure units, if not, assign empty string to compile with Nagios standard 
             _units = units != "none" ? units : "";
-            
+
             // Min has value
             if (min != "none")
             {
@@ -195,50 +196,45 @@ namespace check_win_perfmon
             if (max != "none" && max != "0")
             {
                 // Max is auto, trying auto detection
-                if (max == "auto")
+                if (max == autoMemory || max == autoNetwork)
                 {
                     // Write verbose auto detection for max
                     WriteVerbose($"Detecting max for: {_performanceCounterString}");
                     // Inspect categoryName in order to perform auto detection
-                    switch (categoryName)
+                    if (max == autoMemory)
                     {
-                        // Auto detect system memory
-                        case "Memory":
-                        case "SQLServer:Memory Manager":
-                        case "MSSQL$MICROSOFT##WID:Memory Manager":
-                        case "Hyper-V Dynamic Memory Balancer":
-                            // Write verbose auto detection for system memory
-                            WriteVerbose("Getting system memory");
-                            // Try to detect system installed memory
-                            _max = Utils.GetTotalMemory(units);
-                            // Utils.GetTotalMemory could not detect system memory, throws an exception
-                            if (_max <= 0)
-                            {
-                                throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", nameof(max));
-                            }
-                            break;
-                        // Auto detect network speed
-                        case "Network Interface":
-                        case "Network Adapter":
-                            // If _interfacename is null, network adapter name has not been auto detected
-                            if (_interfacename == null)
-                            {
-                                // Using interface name provided in instanceName
-                                _interfacename = instanceName;
-                            }
-                            // Write verbose auto detect interface speed
-                            WriteVerbose($"Getting interface {_interfacename} speed");
-                            // Try to detect interface speed
-                            _max = Utils.GetNetworkInterfaceSpeed(_interfacename);
-                            // Utils.GetNetworkInterfaceSpeed could not detect interface speed, throws an exception
-                            if (_max <= 0)
-                            {
-                                throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter {_performanceCounterString}.", nameof(max));
-                            }
-                            break;
+                        // Write verbose auto detection for system memory
+                        WriteVerbose("Getting system memory");
+                        // Try to detect system installed memory
+                        _max = Utils.GetTotalMemory(units);
+                        // Utils.GetTotalMemory could not detect system memory, throws an exception
+                        if (_max <= 0)
+                        {
+                            throw new ArgumentException($"Error detecting system memory in counter {_performanceCounterString}.", nameof(max));
+                        }
+                    }
+                    else if (max == "autonetwork")
+                    {
+                        // If _interfacename is null, network adapter name has not been auto detected
+                        if (_interfacename == null)
+                        {
+                            // Using interface name provided in instanceName
+                            _interfacename = instanceName;
+                        }
+                        // Write verbose auto detect interface speed
+                        WriteVerbose($"Getting interface {_interfacename} speed");
+                        // Try to detect interface speed
+                        _max = Utils.GetNetworkInterfaceSpeed(_interfacename);
+                        // Utils.GetNetworkInterfaceSpeed could not detect interface speed, throws an exception
+                        if (_max <= 0)
+                        {
+                            throw new ArgumentException($"Error detecting interface {_interfacename} speed in counter {_performanceCounterString}.", nameof(max));
+                        }
+                    }
+                    else
+                    {
                         // Parameter auto for max is only supported for Memory, SQLServer:Memory Manager, MSSQL$MICROSOFT##WID:Memory Manager, Network Interface and Network Adapter categoryName
-                        default:
-                            throw new ArgumentException($"Parameter auto not supported for max in counter {_performanceCounterString}.", nameof(max));
+                        throw new ArgumentException($"Parameter auto not supported for max in counter {_performanceCounterString}.", nameof(max));
                     }
                     // Write verbose detection of max has been successful
                     WriteVerbose($"Detected max of: {_max.ToString(FormatFloat)} for counter: {_performanceCounterString}");
@@ -269,7 +265,7 @@ namespace check_win_perfmon
             if (warning != "none" && critical != "none")
             {
                 //Parse warning and critical into float
-                ParseIntoFloat(warning,out _warning);
+                ParseIntoFloat(warning, out _warning);
                 ParseIntoFloat(critical, out _critical);
             }
             // Critical is none and warning has value, only warning will be checked, user need to specify greater or less to compare
@@ -367,7 +363,7 @@ namespace check_win_perfmon
 
         /// <summary>
         /// Calculate next value of a counter and add it to total
-       /// </summary>
+        /// </summary>
         public float NextValue()
         {
             // Check if counter has been initialized
@@ -437,7 +433,7 @@ namespace check_win_perfmon
             // Check if warning and critical has valid values, if not, leave empty in performance output
             var warning = _warning > 0 ? _warning.ToString(FormatFloat) : "";
             var critical = _critical > 0 ? _critical.ToString(FormatFloat) : "";
-            
+
             //Units are percent
             if (_units == "%")
             {
@@ -457,7 +453,7 @@ namespace check_win_perfmon
 
                 //Store performance output in Nagios / Icinga format
                 PerfString = $"'{_friendlyName}'={Math.Round(_result, 4, MidpointRounding.AwayFromZero).ToString(FormatFloat)}{_units};{_warning.ToString(FormatFloat)};{_critical.ToString(FormatFloat)};{min};{max}";
-                
+
                 //If max has a value, calculate new performance output with percent values
                 if (_max > 0)
                 {
@@ -602,7 +598,7 @@ namespace check_win_perfmon
         /// Saves error in ResultString
         /// </summary>
         /// <param name="nagiosStatusEnum"></param>
-        private void RegisterStatusOnCounter(NagiosStatusEnum nagiosStatusEnum )
+        private void RegisterStatusOnCounter(NagiosStatusEnum nagiosStatusEnum)
         {
             // Set status warning
             if (nagiosStatusEnum == NagiosStatusEnum.Warning)
