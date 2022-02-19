@@ -122,7 +122,7 @@ function Invoke-Process {
 
 $exePath = "$env:ProgramFiles\ICINGA2\sbin\check_win_perfmon.exe"
 $url = 'https://github.com/juangranados/check_win_perfmon/releases/download/1.5/check_win_perfmon.exe'
-$hash = '83DDC35C71336472D33D612BAEF81E69FBA775DB35D5FA36777933D81D896247'
+$hash = 'BB2D394BFE165BCE284E53CCE6C2C06BD8A1203F27C9284CCA78A726890C6CA0'
 
 $ErrorActionPreference = "SilentlyContinue"
 $path = $exePath.Substring(0, $file.LastIndexOf('\'))
