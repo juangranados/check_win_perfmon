@@ -169,6 +169,24 @@ namespace check_win_perfmon.Test
             perfCounter.NextValue();
         }
         /// <summary>
+        /// Test if exception is thrown if instance is deprecated auto
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_DeprecatedAutoInstance_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "auto", "ProcessorTime", "%", "5", "10", "0", "100");
+        }
+        /// <summary>
+        /// Test if exception is thrown if instance is deprecated auto
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PerfCounter_DeprecatedAutoMax_ThrowsAnException()
+        {
+            var unused = new PerfCounter("Processor", "% Processor Time", "_Total", "ProcessorTime", "%", "5", "10", "0", "auto");
+        }
+        /// <summary>
         /// Simulate OK status.
         /// Warning and critical are 99 an 99 for % Processor Time
         /// </summary>

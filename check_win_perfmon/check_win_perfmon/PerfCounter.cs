@@ -15,6 +15,7 @@ namespace check_win_perfmon
         private const string autoMemory = "automemory";
         private const string autoNetwork = "autonetwork";
         private const string autoDisk = "autodisk";
+        private const string autoDeprecated = "auto";
 
         // Performance counter System object.
         private PerformanceCounter _performanceCounter;
@@ -108,6 +109,9 @@ namespace check_win_perfmon
                 // Performance counter with instance
                 if (instanceName != "none")
                 {
+                    if (instanceName == autoDeprecated) {
+                        throw new ArgumentException($"auto is deprecated for instance name. Use {autoNetwork} or {autoDisk} instead.", nameof(instanceName));
+                    }
                     if ((instanceName == autoNetwork) || (instanceName == autoDisk)) {
                         //If instance name is "autonetwork", try to detect instance
                         if (instanceName == autoNetwork)
@@ -122,7 +126,7 @@ namespace check_win_perfmon
                                 throw new ArgumentException($"Error detecting network interface on \\{categoryName}\\{counterName}.", nameof(instanceName));
                             }
                         }
-                        else if (instanceName == autoDisk)
+                        else
                         {
                             // Auto detect physical disk 0
                             instanceName = Utils.GetDiskName();
@@ -131,12 +135,6 @@ namespace check_win_perfmon
                             {
                                 throw new ArgumentException($"Error detecting physical disk 0 on \\{categoryName}\\{counterName}.", nameof(instanceName));
                             }
-                        }
-                        else
-                        {
-                            // Parameter auto for instanceName is only supported for Network and PhysicalDisk
-                            throw new ArgumentException(
-                            $"Parameter {instanceName} not supported. Only autonetwork for Network inteface and autodisk for PhysicalDisk 0 are supported", nameof(instanceName));
                         }
                         // Write verbose auto detection has been successful
                         WriteVerbose($"Detected instance {instanceName} for counter \\{categoryName}\\{counterName}");
@@ -158,6 +156,11 @@ namespace check_win_perfmon
                 }
                 // Write verbose creation of performance counter object has been successful
                 WriteVerbose($"Created read only performance counter {_performanceCounterString}");
+            }
+            // Argument exception
+            catch (ArgumentException e)
+            {
+                throw e;
             }
             // Something went wrong on performance object creation, throws an exception
             catch (Exception e)
@@ -195,6 +198,10 @@ namespace check_win_perfmon
             // Max has value and is not zero
             if (max != "none" && max != "0")
             {
+                if (max == autoDeprecated)
+                {
+                    throw new ArgumentException($"auto is deprecated for max. Use {autoNetwork} or {autoMemory} instead.", nameof(max));
+                }
                 // Max is auto, trying auto detection
                 if (max == autoMemory || max == autoNetwork)
                 {
