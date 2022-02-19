@@ -21,7 +21,7 @@ namespace check_win_perfmon
         private NagiosStatus NagiosState { get; } = new NagiosStatus();
         // Set verbose output to console
         private readonly bool _verbose;
-        // Set verbose output to console
+        // XML parameters
         private readonly string[] _xmlParams;
 
         /// <summary>
@@ -33,7 +33,8 @@ namespace check_win_perfmon
         {
             _verbose = verbose;
             _xmlParams = xmlParams;
-            LoadXml(xmlFilePath, xmlParams, verbose);
+            WriteVerbose($"XML Params: {xmlParams}");
+            LoadXml(xmlFilePath, verbose);
             WriteVerbose("XML loaded");
         }
         /// <summary>
@@ -81,7 +82,7 @@ namespace check_win_perfmon
         /// </summary>
         /// <param name="xmlFilePath">XML file path</param>
         /// <param name="verbose">PerfCounter write debugging messages on console</param>
-        private void LoadXml(string xmlFilePath, string[] xmlParams, bool verbose = false)
+        private void LoadXml(string xmlFilePath, bool verbose = false)
         {
             //Dispose PerfCounter list if not empty
             if (_perfCounters != null)

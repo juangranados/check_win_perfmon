@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CommandLine;
+using CommandLine.Text;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace check_win_perfmon
@@ -27,10 +30,15 @@ namespace check_win_perfmon
                 //Initializing arguments
                 var options = new Options();
                 //Parsing arguments
-                CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
+                // CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
+                var parser = new CommandLine.Parser(with => with.HelpWriter = null);
+                var parserResult = parser.ParseArguments<Options>(args); 
+                parserResult
+                  .WithParsed<Options>(opt => options = opt )
+                  .WithNotParsed(errs => DisplayHelp(parserResult, errs));
                 //Load XML with performance counters and calculate result
                 //Load XML file
-                using (var perfCounterList = new PerfCounterList(options.XmlFile, options.XmlParameters, options.Verbose))
+                using (var perfCounterList = new PerfCounterList(options.XmlFile, (string[])options.XmlParameters, options.Verbose))
                 {
                     //Taking samples and calculate result of performance counters
                     perfCounterList.Calculate(options.MaxSamples, options.TimeSamples);
@@ -59,6 +67,19 @@ namespace check_win_perfmon
                 Environment.Exit(3);
             }
             
+        }
+
+        private static void DisplayHelp(ParserResult<Options> result, IEnumerable<Error> errs)
+        {
+            var helpText = HelpText.AutoBuild(result, h =>
+            {
+                h.AdditionalNewLineAfterOption = true;
+                h.Heading = "Check Win Perfmon v2.0";
+                h.Copyright = "Juan Granados";
+                h.AddPreOptionsLine("https://github.com/juangranados/check_win_perfmon");
+                return HelpText.DefaultParsingErrorsHandler(result, h);
+            }, e => e);
+            Console.WriteLine(helpText);
         }
     }
 }

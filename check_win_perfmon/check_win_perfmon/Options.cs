@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System.Collections.Generic;
 
 namespace check_win_perfmon
 {
@@ -7,35 +8,19 @@ namespace check_win_perfmon
     /// </summary>
     internal class Options
     {
-        [Option('f', "xmlFile", DefaultValue = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
+        [Option('f', "xmlFile", Default = "PerfMonCPU.xml", HelpText = "XML file with performance counters to check.")]
         public string XmlFile { get; set; }
 
-        [Option('s', "maxSamples", DefaultValue = 3, HelpText = "Amount of samples to take from performance counter.")]
+        [Option('s', "maxSamples", Default = 3, HelpText = "Amount of samples to take from performance counter.")]
         public int MaxSamples { get; set; }
 
-        [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
+        [Option('t', "timeSamples", Default = 1000, HelpText = "Time between samples in ms")]
         public int TimeSamples { get; set; }
 
         [Option('p', "xmlParameters", HelpText = "List of xml parameters")]
-        public string[] XmlParameters { get; set; }
+        public IEnumerable<string> XmlParameters { get; set; }
 
         [Option('v', "verbose", HelpText = "Verbose output to debug.")]
         public bool Verbose { get; set; }
-
-        [HelpOption]
-        public string GetUsage()
-        {
-            var help = new CommandLine.Text.HelpText
-            {
-                Heading = new CommandLine.Text.HeadingInfo(programName: "Check Win Perfmon", version: "2.0\n"),
-                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2022),
-                AdditionalNewLineAfterOption = true,
-                AddDashesToOption = true
-            };
-            help.AddPreOptionsLine("GNU General Public License 3.0\n");
-            help.AddPreOptionsLine("Usage: check_win_perfmon.exe parameters:\n");
-            help.AddOptions(this);
-            return help;
-        }
     }
 }
