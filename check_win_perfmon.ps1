@@ -52,7 +52,7 @@ Param(
     [int]$samples = 3,
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [int]$xmlParams = "null",
+    [string]$xmlParams = "null",
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [switch]$noalerts
