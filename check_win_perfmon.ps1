@@ -147,6 +147,12 @@ if (!$noalerts) {
 else {
     $checkResult = Invoke-Process -FilePath $exePath -ArgumentList "-f $file -t $time -s $samples -p $xmlParams -n"
 }
+if (-not [string]::IsNullOrWhiteSpace($checkResult.StdOut)) {
+    Write-Host $checkResult.StdOut
+}
 
-Write-Host $checkResult.StdOut
+if (-not [string]::IsNullOrWhiteSpace($checkResult.StdErr)) {
+    Write-Host $checkResult.StdErr
+}
+
 Exit $checkResult.ExitCode
