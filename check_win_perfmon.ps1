@@ -27,6 +27,8 @@
  .PARAMETER samples
     Amount of samples to take from perfmon.
     Default 3.
+.PARAMETER xmlParams
+    Parameters for xml file.
  .PARAMETER noalerts
     Allways returns ok status.
     Default false.
@@ -48,6 +50,9 @@ Param(
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [int]$samples = 3,
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [int]$xmlParams = "null",
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [switch]$noalerts
@@ -137,10 +142,10 @@ if (-not (Test-Path $exePath)) {
     Exit 3
 }
 if (!$noalerts) {
-    $checkResult = Invoke-Process -FilePath $exePath -ArgumentList "-f $file -t $time -s $samples"
+    $checkResult = Invoke-Process -FilePath $exePath -ArgumentList "-f $file -t $time -s $samples -p $xmlParams"
 }
 else {
-    $checkResult = Invoke-Process -FilePath $exePath -ArgumentList "-f $file -t $time -s $samples -n"
+    $checkResult = Invoke-Process -FilePath $exePath -ArgumentList "-f $file -t $time -s $samples -p $xmlParams -n"
 }
 
 Write-Host $checkResult.StdOut

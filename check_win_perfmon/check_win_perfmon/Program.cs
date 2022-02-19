@@ -57,7 +57,15 @@ namespace check_win_perfmon
                     }
 
                     //Exit code for monitoring software
-                    Environment.Exit(perfCounterList.GetGlobalExitCode());
+                    if (!options.NoAlerts)
+                    {
+                        Environment.Exit(perfCounterList.GetGlobalExitCode());
+                    }
+                    else 
+                    {
+                        Environment.Exit(0);
+                    }
+                    
                 }
             }
             catch (Exception e)
@@ -73,13 +81,15 @@ namespace check_win_perfmon
         {
             var helpText = HelpText.AutoBuild(result, h =>
             {
-                h.AdditionalNewLineAfterOption = true;
+                h.AdditionalNewLineAfterOption = false;
+                h.AutoVersion = true;
                 h.Heading = "Check Win Perfmon v2.0";
                 h.Copyright = "Juan Granados";
                 h.AddPreOptionsLine("https://github.com/juangranados/check_win_perfmon");
                 return HelpText.DefaultParsingErrorsHandler(result, h);
             }, e => e);
             Console.WriteLine(helpText);
+            Environment.Exit(3);
         }
     }
 }
