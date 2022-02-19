@@ -16,6 +16,9 @@ namespace check_win_perfmon
         [Option('t', "timeSamples", DefaultValue = 1000, HelpText = "Time between samples in ms")]
         public int TimeSamples { get; set; }
 
+        [Option('p', "xmlParameters", HelpText = "List of xml parameters")]
+        public string[] XmlParameters { get; set; }
+
         [Option('v', "verbose", HelpText = "Verbose output to debug.")]
         public bool Verbose { get; set; }
 
@@ -24,8 +27,8 @@ namespace check_win_perfmon
         {
             var help = new CommandLine.Text.HelpText
             {
-                Heading = new CommandLine.Text.HeadingInfo(programName: "Check Win Perfmon", version: "1.4\n"),
-                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2018),
+                Heading = new CommandLine.Text.HeadingInfo(programName: "Check Win Perfmon", version: "2.0\n"),
+                Copyright = new CommandLine.Text.CopyrightInfo("Juan Granados\n", 2022),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };

@@ -30,7 +30,7 @@ namespace check_win_perfmon
                 CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
                 //Load XML with performance counters and calculate result
                 //Load XML file
-                using (var perfCounterList = new PerfCounterList(options.XmlFile, options.Verbose))
+                using (var perfCounterList = new PerfCounterList(options.XmlFile, options.XmlParameters, options.Verbose))
                 {
                     //Taking samples and calculate result of performance counters
                     perfCounterList.Calculate(options.MaxSamples, options.TimeSamples);

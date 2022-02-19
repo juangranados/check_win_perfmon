@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace check_win_perfmon
@@ -17,14 +19,22 @@ namespace check_win_perfmon
         // PerfCounter list
         private List<PerfCounter> _perfCounters;
         private NagiosStatus NagiosState { get; } = new NagiosStatus();
+        // Set verbose output to console
+        private readonly bool _verbose;
+        // Set verbose output to console
+        private readonly string[] _xmlParams;
+
         /// <summary>
         /// Initialize PerfCounter list from a XML file
         /// </summary>
         /// <param name="xmlFilePath">XML file containing performance counters definitions</param>
         /// <param name="verbose">PerfCounter print verbose output to console</param>
-        public PerfCounterList(string xmlFilePath, bool verbose = false)
+        public PerfCounterList(string xmlFilePath, string[] xmlParams = null, bool verbose = false)
         {
-            LoadXml(xmlFilePath, verbose);
+            _verbose = verbose;
+            _xmlParams = xmlParams;
+            LoadXml(xmlFilePath, xmlParams, verbose);
+            WriteVerbose("XML loaded");
         }
         /// <summary>
         /// Initialize PerfCounter list from a performance counter list
@@ -71,7 +81,7 @@ namespace check_win_perfmon
         /// </summary>
         /// <param name="xmlFilePath">XML file path</param>
         /// <param name="verbose">PerfCounter write debugging messages on console</param>
-        private void LoadXml(string xmlFilePath, bool verbose = false)
+        private void LoadXml(string xmlFilePath, string[] xmlParams, bool verbose = false)
         {
             //Dispose PerfCounter list if not empty
             if (_perfCounters != null)
@@ -94,15 +104,15 @@ namespace check_win_perfmon
                     {
                         _perfCounters.Add(
                             new PerfCounter(
-                                node.SelectSingleNode("category")?.InnerText,
-                                node.SelectSingleNode("name")?.InnerText,
-                                node.SelectSingleNode("instance")?.InnerText,
-                                node.SelectSingleNode("friendlyname")?.InnerText,
-                                node.SelectSingleNode("units")?.InnerText,
-                                node.SelectSingleNode("warning")?.InnerText,
-                                node.SelectSingleNode("critical")?.InnerText,
-                                node.SelectSingleNode("min")?.InnerText,
-                                node.SelectSingleNode("max")?.InnerText,
+                                CheckParams(node.SelectSingleNode("category")?.InnerText),
+                                CheckParams(node.SelectSingleNode("name")?.InnerText),
+                                CheckParams(node.SelectSingleNode("instance")?.InnerText),
+                                CheckParams(node.SelectSingleNode("friendlyname")?.InnerText),
+                                CheckParams(node.SelectSingleNode("units")?.InnerText),
+                                CheckParams(node.SelectSingleNode("warning")?.InnerText),
+                                CheckParams(node.SelectSingleNode("critical")?.InnerText),
+                                CheckParams(node.SelectSingleNode("min")?.InnerText),
+                                CheckParams(node.SelectSingleNode("max")?.InnerText),
                                 verbose
                             )
                         );
@@ -219,6 +229,58 @@ namespace check_win_perfmon
         public int GetGlobalExitCode()
         {
             return NagiosState.GetNagiosExitCode();
+        }
+        /// <summary>
+        /// Check for params keyword in xml field and change it for its real value.
+        /// </summary>
+        /// <param name="xmlField">Field to check</param>
+        private string CheckParams(string xmlField)
+        {
+            if (xmlField == null) {
+                throw new ArgumentException("XML field cannot be null.");
+            }
+            // Finds any parameter like {0} or {2} or {20}
+            MatchCollection matches = Regex.Matches(xmlField, "{[0-9^}]+}");
+            
+            // Regex regex = new Regex("[ -~]+{([0-9]+)}[ -~]+");
+            if (matches.Count > 0) 
+            {
+                foreach (Match match in matches)
+                {
+                    WriteVerbose($"Param {match.Value} found");
+                    // Get param number inside {}
+                    int paramNumber = Int32.Parse(match.ToString().Substring(1, match.ToString().Length - 2));
+                    WriteVerbose($"Param number: {paramNumber}");
+                    if (_xmlParams.Length > paramNumber && _xmlParams[paramNumber] != null)
+                    {
+                        string paramValue = _xmlParams[paramNumber];
+                        WriteVerbose($"Param number {paramNumber} value is {paramValue}");
+                        WriteVerbose($"Replacing {match.Value} by {paramValue}");
+                        xmlField = xmlField.ReplaceFirst(match.Value, paramValue);
+                        WriteVerbose($"XML field is now {xmlField}");
+                    }
+                    else 
+                    {
+                        throw new Exception($"Param number {paramNumber} does not exist in array of parameters received.");
+                    }
+                }
+                return xmlField;
+            }
+            else 
+            { 
+                return xmlField;
+            }
+        }
+        /// <summary>
+        /// Write to console if _verbose is true
+        /// </summary>
+        /// <param name="output">Message to output</param>
+        private void WriteVerbose(string output)
+        {
+            if (_verbose)
+            {
+                Console.WriteLine($"[{DateTime.Now.ToString("MM/dd/yyyy-HH:mm:ss.fff", DateTimeFormatInfo.InvariantInfo)}] {output}");
+            }
         }
     }
 }
