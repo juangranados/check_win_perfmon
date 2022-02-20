@@ -11,7 +11,7 @@ Returns exit and performance data in Icinga/Nagios format.
 
 ***Release 2.0 has breaking changes with 1.4. You must change 'auto' parameter in xml files for 'automemory', 'autodisk' or 'autonetwork'***
 
-Please read below prior use it! 
+Please read below before use it! 
 
 Preconfigured XML files
 -----------------------
