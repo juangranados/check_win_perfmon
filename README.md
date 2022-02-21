@@ -1,9 +1,9 @@
 # Check Win Perfmon
-Plugin for Icinga/Nagios that allow to check a group of Windows performance counters specified in a XML file.
+Plugin for Nagios/Icinga that allows to check a group of Windows performance counters specified in a XML file.
 
-Checks value of performance counter based on threshold specified.
+Checks value of performance counters based on thresholds specified in XML.
 
-Returns exit and performance data in Icinga/Nagios format.
+Returns exit code and [performance data](https://nagios-plugins.org/doc/guidelines.html#AEN200) in Nagios/Icinga format.
 
 ![Performance output](https://github.com/juangranados/check_win_perfmon/blob/master/PerformanceOutput.PNG)
 
@@ -144,7 +144,7 @@ In the example above, program will check two counters. For each counter, we need
 	* autonetwork: detects main network interface.
 	* autodisk: detect system disk.
 * **friendlyname:** name of performance counter which program returns in performance output.
-* **units:** units program returns in performance output.
+* **units:** units program returns in performance output. Check units on Nagios performance data [docs](https://nagios-plugins.org/doc/guidelines.html#AEN200).
 * **warning:** Warning threshold for performance counter.
 * **critical:** Critical threshold for performance counter.
 * **min:** minimum value of performance counter. If you do not know the minimum value, it has to be: none.
@@ -154,6 +154,15 @@ In the example above, program will check two counters. For each counter, we need
 
 If max and min are specified, program returns one more performance result for calculated percent value.
 Max and min must have different value.
+
+Warning and critical can be a % of max value. For example:
+
+```
+	<warning>80%</warning>
+	<critical>95%</critical>
+	<min>0</min>
+	<max>20480</max>
+```
 
 If you want to check only warning or critical threshold, it should have the format: lt<value> or gt<value>, and none for not checked one.
 For example, warning if counter is less or equal than 15:
